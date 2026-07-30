@@ -51,7 +51,7 @@
             background: #ece4ce;
 
             transform: translateY(-100vh);
-            transform-origin: center bottom;
+            transform-origin: center center;
 
             will-change: transform;
         }
@@ -86,6 +86,7 @@
 
             opacity: 0;
             transform: scale(1);
+            transform-origin: center center;
 
             will-change: transform, opacity;
         }
@@ -119,11 +120,45 @@
         let previousTime = null;
         let bounceCount = 0;
         let squash = 0;
+
         let finished = false;
         let rippleStarted = false;
+        let ballExpansionStarted = false;
+
+        function expandBall() {
+            if (ballExpansionStarted) return;
+
+            ballExpansionStarted = true;
+
+            const diagonal = Math.hypot(
+                window.innerWidth,
+                window.innerHeight
+            );
+
+            const requiredScale = diagonal / 90 + 0.5;
+
+            ball.animate(
+                [
+                    {
+                        transform: "translateY(0) scale(1)"
+                    },
+                    {
+                        transform:
+                            `translateY(0) scale(${requiredScale})`
+                    }
+                ],
+                {
+                    duration: 1200,
+                    easing: "cubic-bezier(0.76, 0, 0.24, 1)",
+                    fill: "forwards"
+                }
+            );
+        }
 
         function startRipples() {
             ripples.forEach((ripple, index) => {
+                const rippleDelay = index * 220;
+
                 ripple.animate(
                     [
                         {
@@ -142,12 +177,38 @@
                     ],
                     {
                         duration: 1800,
-                        delay: index * 220,
+                        delay: rippleDelay,
                         easing: "cubic-bezier(0.16, 1, 0.3, 1)",
                         fill: "forwards"
                     }
                 );
+
+                /*
+                    세 번째 동심원이 시작되는 순간
+                    가운데 원도 동시에 확장
+                */
+                if (index === 2) {
+                    setTimeout(() => {
+                        expandBall();
+                    }, rippleDelay);
+                }
             });
+        }
+
+        function beginRippleSequence() {
+            if (rippleStarted) return;
+
+            rippleStarted = true;
+
+            if ("vibrate" in navigator) {
+                navigator.vibrate(80);
+            }
+
+            /*
+                대기 시간 없음.
+                공이 멈추는 즉시 파동 시작.
+            */
+            startRipples();
         }
 
         function animate(currentTime) {
@@ -187,19 +248,7 @@
                         velocity = 0;
                         finished = true;
 
-                        if (!rippleStarted) {
-                            rippleStarted = true;
-
-                           setTimeout(() => {
-
-                              if ("vibrate" in navigator) {
-                                navigator.vibrate(80);
-                             }
-
-                             startRipples();
-
-                        }, 0);
-                        }
+                        beginRippleSequence();
                     }
                 }
             }
@@ -209,8 +258,10 @@
             const scaleX = 1 + squash;
             const scaleY = 1 - squash * 0.72;
 
-            ball.style.transform =
-                `translateY(${y}px) scale(${scaleX}, ${scaleY})`;
+            if (!ballExpansionStarted) {
+                ball.style.transform =
+                    `translateY(${y}px) scale(${scaleX}, ${scaleY})`;
+            }
 
             requestAnimationFrame(animate);
         }
