@@ -1,166 +1,83 @@
-* {
+*{
     margin:0;
     padding:0;
     box-sizing:border-box;
 }
 
+html,body{
 
-body {
+    width:100%;
+    height:100%;
+
+    overflow:hidden;
+
+    background:#000;
+}
+
+#scene{
+
+    position:relative;
+
     width:100vw;
     height:100vh;
-    background:#000;
+
     overflow:hidden;
 }
 
 
-.scene {
-    width:100%;
-    height:100%;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    position:relative;
+/* 가운데 그룹 */
+
+#group{
+
+    position:absolute;
+
+    left:50%;
+    top:50%;
+
+    transform:translate(-50%,-50%);
+
 }
 
 
-/* 원 */
+/* 공 */
 
-.ball {
+#ball{
 
-    width:100px;
-    height:100px;
+    position:absolute;
 
-    background:#ECE4CE;
+    left:50%;
+    top:50%;
+
+    width:90px;
+    height:90px;
+
+    transform:translate(-50%,-50%);
+
     border-radius:50%;
 
-    position:absolute;
+    background:#ECE4CE;
 
-    top:-120px;
-
-    animation:
-    fall 1.5s forwards,
-    bounce 0.5s 1.5s forwards,
-    expand 2s 4s forwards;
-
+    z-index:10;
 }
 
 
-/* 떨어지는 애니메이션 */
+/* 동심원 */
 
-@keyframes fall {
-
-    0%{
-        top:-120px;
-    }
-
-    100%{
-        top:50%;
-    }
-
-}
-
-
-/* 살짝 튀기 */
-
-@keyframes bounce {
-
-    0%{
-        transform:translateY(0);
-    }
-
-    50%{
-        transform:translateY(-40px);
-    }
-
-    100%{
-        transform:translateY(0);
-    }
-
-}
-
-
-/* 화면 가득 커지기 */
-
-@keyframes expand {
-
-
-    0%{
-        width:100px;
-        height:100px;
-    }
-
-
-    100%{
-
-        width:200vmax;
-        height:200vmax;
-
-    }
-
-}
-
-
-/* 파동 */
-
-.wave {
+.ring{
 
     position:absolute;
 
-    color:#ECE4CE;
+    left:50%;
+    top:50%;
 
-    font-size:80px;
+    width:90px;
+    height:90px;
+
+    transform:translate(-50%,-50%) scale(.2);
+
+    border-radius:50%;
+
+    border:2px solid #ECE4CE;
 
     opacity:0;
-
-
-    animation:
-    showWave 1s 2s forwards,
-    spread 2s 2s forwards;
-
-}
-
-
-.left {
-
-    transform:translateX(-100px);
-
-}
-
-
-.right {
-
-    transform:translateX(100px);
-
-}
-
-
-@keyframes showWave {
-
-    from{
-        opacity:0;
-    }
-
-    to{
-        opacity:1;
-    }
-
-}
-
-
-@keyframes spread {
-
-
-    from{
-
-        letter-spacing:0px;
-
-    }
-
-
-    to{
-
-        letter-spacing:80px;
-
-    }
-
 }

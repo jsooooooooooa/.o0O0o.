@@ -1,0 +1,217 @@
+const tl = gsap.timeline();
+
+const ball = document.querySelector("#ball");
+
+
+// 시작 위치
+gsap.set(ball,{
+    y:-700
+});
+
+
+// -------------------
+// 낙하
+// -------------------
+
+tl.to(ball,{
+
+    duration:1,
+
+    y:0,
+
+    ease:"power2.in"
+
+})
+
+
+// -------------------
+// 첫 충돌
+// -------------------
+
+.call(()=>{
+
+    // 휴대폰 진동
+
+    if(navigator.vibrate){
+
+        navigator.vibrate(40);
+
+    }
+
+})
+
+
+// 화면 흔들기
+
+.to("#scene",{
+
+    x:-5,
+
+    duration:0.03,
+
+    repeat:5,
+
+    yoyo:true
+
+},"<")
+
+
+
+// -------------------
+// 여러번 바운스
+// -------------------
+
+.to(ball,{
+
+    y:-140,
+
+    duration:.28,
+
+    ease:"power2.out"
+
+},"<")
+
+.to(ball,{
+
+    y:0,
+
+    duration:.25,
+
+    ease:"power2.in"
+
+})
+
+.to(ball,{
+
+    y:-70,
+
+    duration:.20,
+
+    ease:"power2.out"
+
+})
+
+.to(ball,{
+
+    y:0,
+
+    duration:.18,
+
+    ease:"power2.in"
+
+})
+
+.to(ball,{
+
+    y:-30,
+
+    duration:.15,
+
+    ease:"power2.out"
+
+})
+
+.to(ball,{
+
+    y:0,
+
+    duration:.13,
+
+    ease:"power2.in"
+
+})
+
+
+
+// -------------------
+// 잠깐 멈춤
+// -------------------
+
+.to({},{
+
+    duration:.6
+
+})
+
+
+
+// -------------------
+// 동심원
+// -------------------
+
+.call(()=>{
+
+    gsap.utils.toArray(".ring").forEach((ring,i)=>{
+
+        gsap.fromTo(
+
+            ring,
+
+            {
+
+                opacity:.8,
+
+                scale:1
+
+            },
+
+            {
+
+                opacity:0,
+
+                scale:4,
+
+                duration:1,
+
+                delay:i*.15,
+
+                ease:"power1.out"
+
+            }
+
+        );
+
+    });
+
+})
+
+
+
+
+// -------------------
+// 기다림
+// -------------------
+
+.to({},{
+
+    duration:1.2
+
+})
+
+
+
+// -------------------
+// 화면 덮기
+// -------------------
+
+.to(ball,{
+
+    scale:45,
+
+    duration:1.3,
+
+    ease:"power4.in"
+
+})
+
+
+
+// -------------------
+// 다음 페이지
+// -------------------
+
+.call(()=>{
+
+//window.location="spine.html";
+
+});
