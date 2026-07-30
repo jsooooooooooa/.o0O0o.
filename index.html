@@ -1,22 +1,216 @@
 <!DOCTYPE html>
 <html lang="ko">
-
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    >
+
     <title>.o0O0o.</title>
 
-    <link rel="stylesheet" href="css/style.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #000000;
+        }
+
+        #scene {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh;
+            overflow: hidden;
+            background: #000000;
+        }
+
+        #ball {
+            position: absolute;
+            z-index: 2;
+
+            left: 50%;
+            top: 50%;
+
+            width: 90px;
+            height: 90px;
+
+            margin-left: -45px;
+            margin-top: -45px;
+
+            border-radius: 50%;
+            background: #ece4ce;
+
+            transform: translateY(-100vh);
+            transform-origin: center bottom;
+
+            will-change: transform;
+        }
+
+        #ripples {
+            position: absolute;
+            z-index: 1;
+
+            left: 50%;
+            top: 50%;
+
+            width: 1px;
+            height: 1px;
+
+            pointer-events: none;
+        }
+
+        .ripple {
+            position: absolute;
+
+            left: 50%;
+            top: 50%;
+
+            width: 90px;
+            height: 90px;
+
+            margin-left: -45px;
+            margin-top: -45px;
+
+            border: 2px solid #ece4ce;
+            border-radius: 50%;
+
+            opacity: 0;
+            transform: scale(1);
+
+            will-change: transform, opacity;
+        }
+    </style>
 </head>
 
 <body>
 
-    <div id="scene">
-        <div id="ball"></div>
-    </div>
+    <main id="scene">
 
-    <script src="js/main.js"></script>
+        <div id="ripples">
+            <div class="ripple"></div>
+            <div class="ripple"></div>
+            <div class="ripple"></div>
+        </div>
+
+        <div id="ball"></div>
+
+    </main>
+
+    <script>
+        const ball = document.querySelector("#ball");
+        const ripples = document.querySelectorAll(".ripple");
+
+        let y = -window.innerHeight * 0.7;
+        let velocity = 0;
+
+        const gravity = 2200;
+        const bounceStrength = 0.48;
+
+        let previousTime = null;
+        let bounceCount = 0;
+        let squash = 0;
+        let finished = false;
+        let rippleStarted = false;
+
+        function startRipples() {
+            ripples.forEach((ripple, index) => {
+                ripple.animate(
+                    [
+                        {
+                            transform: "scale(1)",
+                            opacity: 0
+                        },
+                        {
+                            transform: "scale(1.05)",
+                            opacity: 0.75,
+                            offset: 0.08
+                        },
+                        {
+                            transform: "scale(7)",
+                            opacity: 0
+                        }
+                    ],
+                    {
+                        duration: 1800,
+                        delay: index * 220,
+                        easing: "cubic-bezier(0.16, 1, 0.3, 1)",
+                        fill: "forwards"
+                    }
+                );
+            });
+        }
+
+        function animate(currentTime) {
+            if (previousTime === null) {
+                previousTime = currentTime;
+            }
+
+            const deltaTime = Math.min(
+                (currentTime - previousTime) / 1000,
+                0.03
+            );
+
+            previousTime = currentTime;
+
+            if (!finished) {
+                velocity += gravity * deltaTime;
+                y += velocity * deltaTime;
+
+                if (y >= 0) {
+                    y = 0;
+
+                    const impactSpeed = Math.abs(velocity);
+
+                    velocity = -impactSpeed * bounceStrength;
+                    bounceCount++;
+
+                    squash = Math.min(
+                        0.18,
+                        impactSpeed / 7000
+                    );
+
+                    if (
+                        bounceCount >= 5 ||
+                        Math.abs(velocity) < 85
+                    ) {
+                        y = 0;
+                        velocity = 0;
+                        finished = true;
+
+                        if (!rippleStarted) {
+                            rippleStarted = true;
+
+                            setTimeout(() => {
+                                startRipples();
+                            }, 350);
+                        }
+                    }
+                }
+            }
+
+            squash *= Math.pow(0.002, deltaTime);
+
+            const scaleX = 1 + squash;
+            const scaleY = 1 - squash * 0.72;
+
+            ball.style.transform =
+                `translateY(${y}px) scale(${scaleX}, ${scaleY})`;
+
+            requestAnimationFrame(animate);
+        }
+
+        requestAnimationFrame(animate);
+    </script>
 
 </body>
-
 </html>

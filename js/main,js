@@ -1,50 +1,43 @@
 const ball = document.querySelector("#ball");
 
 
-// 시작 위치
-let position = -100;
-let velocity = 0;
+let y = -150;
+let speed = 0;
 
 const gravity = 0.8;
 
-const floor = window.innerHeight / 2 + 250;
+const ground = window.innerHeight - 150;
 
-let bounce = 0;
+let bounceCount = 0;
 
 
 function animate(){
 
-    velocity += gravity;
-
-    position += velocity;
-
-
-    // 바닥 충돌
-
-    if(position >= floor){
-
-        position = floor;
-
-        velocity *= -0.55;
-
-        bounce++;
-
-        console.log("bounce", bounce);
+    speed += gravity;
+    y += speed;
 
 
-        // 작은 튐은 종료
+    if(y >= ground){
 
-        if(bounce >= 5){
+        y = ground;
 
-            velocity = 0;
+        speed *= -0.55;
+
+        bounceCount++;
+
+        console.log("bounce", bounceCount);
+
+
+        if(bounceCount >= 5){
+
+            speed = 0;
 
         }
 
     }
 
 
-    ball.style.transform =
-    `translate(-50%, ${position}px)`;
+    ball.style.top = y + "px";
 
 
     requestAnimationFrame(animate);
