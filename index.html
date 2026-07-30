@@ -190,9 +190,15 @@
                         if (!rippleStarted) {
                             rippleStarted = true;
 
-                            setTimeout(() => {
-                                startRipples();
-                            }, 350);
+                           setTimeout(() => {
+
+                              if ("vibrate" in navigator) {
+                                navigator.vibrate(80);
+                             }
+
+                             startRipples();
+
+                        }, 0);
                         }
                     }
                 }
