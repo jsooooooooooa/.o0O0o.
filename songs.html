@@ -104,13 +104,13 @@
         }
 
         .added-song {
-            position: relative;
             text-align: left;
             border-bottom: 1px solid rgba(44, 29, 21, 0.28);
             padding-bottom: 18px;
 
             user-select: none;
             -webkit-user-select: none;
+            -webkit-touch-callout: none;
             touch-action: pan-y;
 
             transition:
@@ -133,30 +133,6 @@
             margin-top: 7px;
             font-size: 15px;
             opacity: 0.65;
-        }
-
-        .delete-button{
-            position:absolute;
-            top:2px;
-            right:0;
-
-            width:22px;
-            height:22px;
-
-            border:none;
-            background:none;
-
-            font-size:18px;
-            line-height:1;
-
-            opacity:.35;
-            cursor:pointer;
-
-            transition:opacity .2s ease;
-        }
-
-        .delete-button:hover{
-            opacity:1;
         }
 
         /* 검색창을 덮는 화면 */
@@ -519,21 +495,54 @@
             artist.className = "added-song-artist";
             artist.textContent = song.artist;
 
-            const deleteButton = document.createElement("button");
-            deleteButton.className = "delete-button";
-            deleteButton.type = "button";
-            deleteButton.textContent = "×";
-            deleteButton.setAttribute("aria-label","삭제");
+            article.append(title, artist);
 
-            deleteButton.addEventListener("click",(event)=>{
-                event.stopPropagation();
+            /*
+            노래를 0.7초 동안 길게 누르면 삭제
+            */
+            let pressTimer = null;
+            let startX = 0;
+            let startY = 0;
+            let longPressTriggered = false;
 
-                deleteSong(song.documentId);
+            function cancelLongPress() {
+                clearTimeout(pressTimer);
+                pressTimer = null;
+                article.classList.remove("pressing");
+            }
+
+            article.addEventListener("pointerdown", (event) => {
+                startX = event.clientX;
+                startY = event.clientY;
+                longPressTriggered = false;
+
+                article.classList.add("pressing");
+
+                pressTimer = setTimeout(() => {
+                    longPressTriggered = true;
+                    article.classList.remove("pressing");
+                    deleteSong(song.documentId);
+                }, 700);
             });
 
-            article.append(deleteButton, title, artist);
+            article.addEventListener("pointermove", (event) => {
+            const movedX = Math.abs(event.clientX - startX);
+            const movedY = Math.abs(event.clientY - startY);
 
-            songList.appendChild(article);
+            if (movedX > 10 || movedY > 10) {
+                cancelLongPress();
+            }
+        });
+
+        article.addEventListener("pointerup", cancelLongPress);
+        article.addEventListener("pointercancel", cancelLongPress);
+        article.addEventListener("pointerleave", cancelLongPress);
+
+        article.addEventListener("contextmenu", (event) => {
+            event.preventDefault();
+        });
+
+        songList.appendChild(article);
         });
     }
 
