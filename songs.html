@@ -68,33 +68,60 @@
             transform-origin:left center;
         }
 
-        #add-button {
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        #add-button{
+            width:64px;
+            height:64px;
 
-            width: 64px;
-            height: 64px;
+            margin:52px auto 0;
 
-            margin: 55px auto 0;
+            border:none;
+            background:#ece4ce;
 
-            border: 1px solid #2c1d15;
-            border-radius: 50%;
+            cursor:pointer;
+            -webkit-tap-highlight-color:transparent;
 
-            font-size: 36px;
-            font-weight: 300;
-            line-height: 1;
+            clip-path:polygon(
+                42% 0%,
+                58% 0%,
+                58% 42%,
+                100% 42%,
+                100% 58%,
+                58% 58%,
+                58% 100%,
+                42% 100%,
+                42% 58%,
+                0% 58%,
+                0% 42%,
+                42% 42%
+            );
+
+            box-shadow:0 0 0 1.4px #2c1d15 inset;
 
             transition:
-                transform 0.25s ease,
-                background-color 0.25s ease,
-                color 0.25s ease;
+                background-color .18s ease,
+                transform .15s ease;
+        }
+
+        #add-button:active{
+            background:#2c1d15;
+
+            transform:scale(.95);
         }
 
         #add-button:hover {
             background: #2c1d15;
             color: #ece4ce;
             transform: rotate(90deg);
+        }
+
+        @media (hover:hover){
+
+            #add-button:hover{
+
+                background:#2c1d15;
+
+            }
+
         }
 
         #song-list {
@@ -310,9 +337,7 @@
             id="add-button"
             type="button"
             aria-label="노래 검색창 열기"
-        >
-            +
-        </button>
+        ></button>
 
         <section
             id="song-list"
