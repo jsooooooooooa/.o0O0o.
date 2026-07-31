@@ -21,7 +21,6 @@
         body {
             width: 100%;
             min-height: 100%;
-
             background: #ece4ce;
         }
 
@@ -29,26 +28,248 @@
             min-height: 100vh;
             min-height: 100dvh;
 
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            padding: 30px;
+            padding:
+                max(30px, env(safe-area-inset-top))
+                max(24px, env(safe-area-inset-right))
+                max(40px, env(safe-area-inset-bottom))
+                max(24px, env(safe-area-inset-left));
 
             color: #2c1d15;
+            font-family: serif;
+        }
+
+        button,
+        input {
+            font: inherit;
+            color: inherit;
+        }
+
+        button {
+            border: none;
+            background: none;
+            cursor: pointer;
         }
 
         main {
             width: 100%;
             max-width: 700px;
-
+            margin: 0 auto;
+            padding-top: 12vh;
             text-align: center;
         }
 
         h1 {
             font-size: clamp(24px, 5vw, 52px);
             font-weight: 400;
+            line-height: 1.35;
             letter-spacing: -0.03em;
+        }
+
+        #add-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            width: 64px;
+            height: 64px;
+
+            margin: 55px auto 0;
+
+            border: 1px solid #2c1d15;
+            border-radius: 50%;
+
+            font-size: 36px;
+            font-weight: 300;
+            line-height: 1;
+
+            transition:
+                transform 0.25s ease,
+                background-color 0.25s ease,
+                color 0.25s ease;
+        }
+
+        #add-button:hover {
+            background: #2c1d15;
+            color: #ece4ce;
+            transform: rotate(90deg);
+        }
+
+        #song-list {
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
+
+            margin-top: 70px;
+            padding-bottom: 80px;
+        }
+
+        .added-song {
+            text-align: left;
+            border-bottom: 1px solid rgba(44, 29, 21, 0.28);
+            padding-bottom: 18px;
+        }
+
+        .added-song-title {
+            font-size: clamp(19px, 3.5vw, 28px);
+            font-weight: 400;
+            line-height: 1.3;
+        }
+
+        .added-song-artist {
+            margin-top: 7px;
+            font-size: 15px;
+            opacity: 0.65;
+        }
+
+        /* 검색창을 덮는 화면 */
+        #search-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+
+            padding:
+                max(30px, env(safe-area-inset-top))
+                max(20px, env(safe-area-inset-right))
+                max(30px, env(safe-area-inset-bottom))
+                max(20px, env(safe-area-inset-left));
+
+            background: rgba(236, 228, 206, 0.98);
+
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+
+            transition:
+                opacity 0.3s ease,
+                visibility 0.3s ease;
+        }
+
+        #search-overlay.open {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+
+        .search-panel {
+            width: 100%;
+            max-width: 700px;
+            padding-top: 5vh;
+        }
+
+        .search-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        #search-form {
+            flex: 1;
+            display: flex;
+            align-items: center;
+
+            border-bottom: 1px solid #2c1d15;
+        }
+
+        #search-input {
+            width: 100%;
+            padding: 14px 4px;
+
+            border: none;
+            outline: none;
+            background: transparent;
+
+            font-size: clamp(19px, 4vw, 28px);
+        }
+
+        #search-input::placeholder {
+            color: rgba(44, 29, 21, 0.45);
+        }
+
+        #search-submit {
+            flex-shrink: 0;
+            padding: 12px 4px 12px 14px;
+            font-size: 16px;
+        }
+
+        #close-button {
+            flex-shrink: 0;
+            width: 44px;
+            height: 44px;
+
+            font-size: 30px;
+            font-weight: 300;
+            line-height: 1;
+        }
+
+        #search-message {
+            min-height: 24px;
+            margin-top: 24px;
+            text-align: left;
+            font-size: 14px;
+            opacity: 0.65;
+        }
+
+        #search-results {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+
+            margin-top: 14px;
+            padding-bottom: 80px;
+        }
+
+        .search-result {
+            width: 100%;
+            padding: 20px 4px;
+
+            border-bottom: 1px solid rgba(44, 29, 21, 0.25);
+
+            text-align: left;
+
+            transition:
+                padding-left 0.2s ease,
+                opacity 0.2s ease;
+        }
+
+        .search-result:hover {
+            padding-left: 10px;
+        }
+
+        .result-title {
+            display: block;
+            font-size: clamp(18px, 3.5vw, 24px);
+            line-height: 1.4;
+        }
+
+        .result-artist {
+            display: block;
+            margin-top: 6px;
+            font-size: 14px;
+            opacity: 0.6;
+        }
+
+        @media (max-width: 600px) {
+            main {
+                padding-top: 9vh;
+            }
+
+            #add-button {
+                width: 58px;
+                height: 58px;
+                margin-top: 42px;
+            }
+
+            #song-list {
+                margin-top: 55px;
+            }
+
+            .search-panel {
+                padding-top: 2vh;
+            }
         }
     </style>
 </head>
@@ -57,7 +278,322 @@
 
     <main>
         <h1>좋아하는 노래를 알려주세요.</h1>
+
+        <button
+            id="add-button"
+            type="button"
+            aria-label="노래 검색창 열기"
+        >
+            +
+        </button>
+
+        <section
+            id="song-list"
+            aria-live="polite"
+        ></section>
     </main>
+
+
+    <!-- 노래 검색 화면 -->
+    <div
+        id="search-overlay"
+        aria-hidden="true"
+    >
+        <div class="search-panel">
+
+            <div class="search-header">
+
+                <form id="search-form">
+                    <input
+                        id="search-input"
+                        type="search"
+                        placeholder="노래 제목이나 가수를 검색하세요."
+                        autocomplete="off"
+                        enterkeyhint="search"
+                    >
+
+                    <button
+                        id="search-submit"
+                        type="submit"
+                    >
+                        검색
+                    </button>
+                </form>
+
+                <button
+                    id="close-button"
+                    type="button"
+                    aria-label="검색창 닫기"
+                >
+                    ×
+                </button>
+
+            </div>
+
+            <p id="search-message"></p>
+
+            <section id="search-results"></section>
+
+        </div>
+    </div>
+
+
+    <script>
+        /*
+            새로 발급한 YouTube API 키를 아래 따옴표 안에 넣어주세요.
+
+        */
+        const YOUTUBE_API_KEY = "AIzaSyCrUlVvF0FVlSxrWBgBLI3eLsXDO6uhW4E";
+
+
+        const addButton = document.getElementById("add-button");
+        const overlay = document.getElementById("search-overlay");
+        const closeButton = document.getElementById("close-button");
+
+        const searchForm = document.getElementById("search-form");
+        const searchInput = document.getElementById("search-input");
+        const searchResults = document.getElementById("search-results");
+        const searchMessage = document.getElementById("search-message");
+
+        const songList = document.getElementById("song-list");
+
+
+        /*
+            현재는 테스트를 위해 브라우저에 노래를 저장합니다.
+            같은 휴대폰·같은 브라우저에서는 새로고침해도 유지됩니다.
+
+            나중에 Firebase를 연결하면 모든 관객이
+            같은 노래 목록을 볼 수 있게 바꿀 수 있습니다.
+        */
+        let savedSongs = JSON.parse(
+            localStorage.getItem("o0O0o-songs") || "[]"
+        );
+
+
+        function openSearch() {
+            overlay.classList.add("open");
+            overlay.setAttribute("aria-hidden", "false");
+
+            document.body.style.overflow = "hidden";
+
+            setTimeout(() => {
+                searchInput.focus();
+            }, 150);
+        }
+
+
+        function closeSearch() {
+            overlay.classList.remove("open");
+            overlay.setAttribute("aria-hidden", "true");
+
+            document.body.style.overflow = "";
+
+            searchInput.value = "";
+            searchResults.innerHTML = "";
+            searchMessage.textContent = "";
+        }
+
+
+        function decodeHtml(text) {
+            const textarea = document.createElement("textarea");
+            textarea.innerHTML = text;
+            return textarea.value;
+        }
+
+
+        function cleanArtistName(channelTitle) {
+            return channelTitle
+                .replace(/\s*-\s*Topic$/i, "")
+                .replace(/\s*VEVO$/i, "")
+                .trim();
+        }
+
+
+        function cleanSongTitle(videoTitle) {
+            return videoTitle
+                .replace(/\s*\(Official\s*(Music\s*)?Video\)/gi, "")
+                .replace(/\s*\[Official\s*(Music\s*)?Video\]/gi, "")
+                .replace(/\s*\(Official\s*Audio\)/gi, "")
+                .replace(/\s*\[Official\s*Audio\]/gi, "")
+                .replace(/\s*\(Lyrics?\)/gi, "")
+                .replace(/\s*\[Lyrics?\]/gi, "")
+                .replace(/\s*\|\s*Official.*$/gi, "")
+                .trim();
+        }
+
+
+        function renderSavedSongs() {
+            songList.innerHTML = "";
+
+            savedSongs.forEach((song) => {
+                const article = document.createElement("article");
+                article.className = "added-song";
+
+                const title = document.createElement("h2");
+                title.className = "added-song-title";
+                title.textContent = song.title;
+
+                const artist = document.createElement("p");
+                artist.className = "added-song-artist";
+                artist.textContent = song.artist;
+
+                article.append(title, artist);
+                songList.appendChild(article);
+            });
+        }
+
+
+        function saveSong(song) {
+            const alreadyExists = savedSongs.some((savedSong) => {
+                return savedSong.videoId === song.videoId;
+            });
+
+            if (alreadyExists) {
+                searchMessage.textContent = "이미 추가된 노래입니다.";
+                return;
+            }
+
+            savedSongs.unshift(song);
+
+            localStorage.setItem(
+                "o0O0o-songs",
+                JSON.stringify(savedSongs)
+            );
+
+            renderSavedSongs();
+            closeSearch();
+        }
+
+
+        function renderSearchResults(items) {
+            searchResults.innerHTML = "";
+
+            if (!items.length) {
+                searchMessage.textContent = "검색 결과가 없습니다.";
+                return;
+            }
+
+            searchMessage.textContent = "추가할 노래를 선택하세요.";
+
+            items.forEach((item) => {
+                const rawTitle = decodeHtml(item.snippet.title);
+                const rawArtist = decodeHtml(item.snippet.channelTitle);
+
+                const song = {
+                    title: cleanSongTitle(rawTitle),
+                    artist: cleanArtistName(rawArtist),
+                    videoId: item.id.videoId
+                };
+
+                const button = document.createElement("button");
+                button.type = "button";
+                button.className = "search-result";
+
+                const title = document.createElement("span");
+                title.className = "result-title";
+                title.textContent = song.title;
+
+                const artist = document.createElement("span");
+                artist.className = "result-artist";
+                artist.textContent = song.artist;
+
+                button.append(title, artist);
+
+                button.addEventListener("click", () => {
+                    saveSong(song);
+                });
+
+                searchResults.appendChild(button);
+            });
+        }
+
+
+        async function searchYouTube(query) {
+            if (
+                !YOUTUBE_API_KEY ||
+                YOUTUBE_API_KEY === "여기에_새_API_키"
+            ) {
+                searchMessage.textContent =
+                    "코드에 YouTube API 키를 먼저 입력해주세요.";
+                return;
+            }
+
+            searchMessage.textContent = "검색 중...";
+            searchResults.innerHTML = "";
+
+            const parameters = new URLSearchParams({
+                part: "snippet",
+                type: "video",
+                maxResults: "10",
+                q: query,
+                videoCategoryId: "10",
+                key: YOUTUBE_API_KEY
+            });
+
+            const requestUrl =
+                "https://www.googleapis.com/youtube/v3/search?" +
+                parameters.toString();
+
+            try {
+                const response = await fetch(requestUrl);
+                const data = await response.json();
+
+                if (!response.ok) {
+                    console.error(data);
+
+                    const apiMessage =
+                        data.error?.message ||
+                        "YouTube 검색 중 오류가 발생했습니다.";
+
+                    throw new Error(apiMessage);
+                }
+
+                renderSearchResults(data.items || []);
+
+            } catch (error) {
+                console.error(error);
+
+                searchMessage.textContent =
+                    "검색하지 못했습니다. API 키 설정과 사이트 제한을 확인해주세요.";
+            }
+        }
+
+
+        addButton.addEventListener("click", openSearch);
+        closeButton.addEventListener("click", closeSearch);
+
+
+        overlay.addEventListener("click", (event) => {
+            if (event.target === overlay) {
+                closeSearch();
+            }
+        });
+
+
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "Escape") {
+                closeSearch();
+            }
+        });
+
+
+        searchForm.addEventListener("submit", (event) => {
+            event.preventDefault();
+
+            const query = searchInput.value.trim();
+
+            if (!query) {
+                searchMessage.textContent =
+                    "노래 제목이나 가수를 입력해주세요.";
+                return;
+            }
+
+            searchYouTube(query);
+        });
+
+
+        renderSavedSongs();
+    </script>
 
 </body>
 </html>
