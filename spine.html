@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    >
+
+    <title>.o0O0o. — spine</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            width: 100%;
+            min-height: 100%;
+            background: #ece4ce;
+            scroll-behavior: auto;
+        }
+
+        body {
+            width: 100%;
+            min-height: 100%;
+
+            overflow-x: hidden;
+            overflow-y: auto;
+
+            background: #ece4ce;
+
+            -webkit-overflow-scrolling: touch;
+        }
+
+        #spine-page {
+            position: relative;
+
+            width: 100%;
+            min-height: 100vh;
+            min-height: 100dvh;
+
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+
+            background: #ece4ce;
+        }
+
+        /*
+            척추 이미지 중앙에서 시작할 때도
+            위쪽과 아래쪽으로 스크롤할 수 있도록
+            이미지 앞뒤에 빈 공간을 둠
+        */
+        .scroll-space {
+            width: 100%;
+
+            height: 55vh;
+            height: 55dvh;
+
+            flex-shrink: 0;
+        }
+
+        #spine-image {
+            display: block;
+
+            width: auto;
+            height: auto;
+
+            max-width: min(72vw, 700px);
+
+            object-fit: contain;
+
+            /*
+                이미지 전체도 처음에는 투명하게 시작
+            */
+            opacity: 0;
+
+            /*
+                정중앙에서 위아래로 퍼지는 마스크
+
+                가운데 부분은 보이고,
+                위아래 끝부분은 투명한 형태의
+                세로 그라데이션 마스크임
+            */
+            -webkit-mask-image:
+                linear-gradient(
+                    to bottom,
+                    transparent 0%,
+                    rgba(0, 0, 0, 0.15) 14%,
+                    black 38%,
+                    black 62%,
+                    rgba(0, 0, 0, 0.15) 86%,
+                    transparent 100%
+                );
+
+            mask-image:
+                linear-gradient(
+                    to bottom,
+                    transparent 0%,
+                    rgba(0, 0, 0, 0.15) 14%,
+                    black 38%,
+                    black 62%,
+                    rgba(0, 0, 0, 0.15) 86%,
+                    transparent 100%
+                );
+
+            /*
+                처음에는 마스크의 세로 크기가 작아서
+                척추 정중앙만 희미하게 보이게 됨
+            */
+            -webkit-mask-size: 100% 2%;
+            mask-size: 100% 2%;
+
+            -webkit-mask-position: center;
+            mask-position: center;
+
+            -webkit-mask-repeat: no-repeat;
+            mask-repeat: no-repeat;
+
+            transform: scale(0.99);
+
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-user-drag: none;
+
+            will-change:
+                opacity,
+                transform,
+                -webkit-mask-size,
+                mask-size;
+        }
+
+        @media (max-width: 700px) {
+            #spine-image {
+                max-width: 88vw;
+            }
+
+            .scroll-space {
+                height: 52vh;
+                height: 52dvh;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            #spine-image {
+                opacity: 1;
+                transform: none;
+
+                -webkit-mask-image: none;
+                mask-image: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <main id="spine-page">
+
+        <div
+            class="scroll-space"
+            aria-hidden="true"
+        ></div>
+
+        <img
+            id="spine-image"
+            src="images/spine.png"
+            alt="척추 드로잉"
+            draggable="false"
+        >
+
+        <div
+            class="scroll-space"
+            aria-hidden="true"
+        ></div>
+
+    </main>
+
+    <script>
+        const spineImage =
+            document.querySelector("#spine-image");
+
+        if ("scrollRestoration" in history) {
+            history.scrollRestoration = "manual";
+        }
+
+        /*
+            척추 이미지의 정확한 정중앙을
+            화면 정중앙에 위치시킴
+        */
+        function centerSpineImage() {
+            const imageCenter =
+                spineImage.offsetTop +
+                spineImage.offsetHeight / 2;
+
+            const targetScroll =
+                imageCenter -
+                window.innerHeight / 2;
+
+            window.scrollTo({
+                top: Math.max(0, targetScroll),
+                left: 0,
+                behavior: "auto"
+            });
+        }
+
+        /*
+            척추 정중앙에서 시작해서
+            위아래 방향으로 동시에 드러나는 애니메이션
+        */
+        function revealSpineImage() {
+            centerSpineImage();
+
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+
+                    /*
+                        마스크 높이가 2%에서 220%로 커지면서
+                        정중앙에서 위아래로 슈우욱 퍼짐
+                    */
+                    spineImage.animate(
+                        [
+                            {
+                                opacity: 0,
+                                transform: "scale(0.99)",
+
+                                webkitMaskSize: "100% 2%",
+                                maskSize: "100% 2%"
+                            },
+                            {
+                                opacity: 0.2,
+                                transform: "scale(0.992)",
+
+                                webkitMaskSize: "100% 20%",
+                                maskSize: "100% 20%",
+
+                                offset: 0.16
+                            },
+                            {
+                                opacity: 0.72,
+                                transform: "scale(0.998)",
+
+                                webkitMaskSize: "100% 115%",
+                                maskSize: "100% 115%",
+
+                                offset: 0.65
+                            },
+                            {
+                                opacity: 1,
+                                transform: "scale(1)",
+
+                                webkitMaskSize: "100% 220%",
+                                maskSize: "100% 220%"
+                            }
+                        ],
+                        {
+                            duration: 4200,
+                            easing:
+                                "cubic-bezier(0.16, 1, 0.3, 1)",
+
+                            fill: "forwards"
+                        }
+                    );
+
+                });
+            });
+        }
+
+        /*
+            척추 이미지가 완전히 로딩된 뒤 실행해야
+            이미지 정중앙을 정확히 계산할 수 있음
+        */
+        if (spineImage.complete) {
+            revealSpineImage();
+        } else {
+            spineImage.addEventListener(
+                "load",
+                revealSpineImage,
+                { once: true }
+            );
+        }
+
+        /*
+            화면 크기가 바뀌면
+            척추 정중앙을 다시 화면 중앙에 맞춤
+        */
+        window.addEventListener("resize", () => {
+            centerSpineImage();
+        });
+    </script>
+
+</body>
+</html>

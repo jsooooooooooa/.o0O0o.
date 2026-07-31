@@ -27,9 +27,11 @@
 
         #scene {
             position: relative;
+
             width: 100vw;
             height: 100vh;
             height: 100dvh;
+
             overflow: hidden;
             background: #000000;
         }
@@ -153,6 +155,14 @@
                     fill: "forwards"
                 }
             );
+
+            /*
+                원이 화면을 완전히 덮은 뒤
+                척추 페이지로 이동
+            */
+            setTimeout(() => {
+                window.location.href = "spine.html";
+            }, 1200);
         }
 
         function startRipples() {
@@ -205,8 +215,8 @@
             }
 
             /*
-                대기 시간 없음.
-                공이 멈추는 즉시 파동 시작.
+                별도의 대기 시간 없이
+                공이 멈추는 즉시 동심원 시작
             */
             startRipples();
         }
