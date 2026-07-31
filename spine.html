@@ -51,7 +51,7 @@
         }
 
         /*
-            척추 이미지 중앙에서 시작할 때도
+            이미지 정중앙에서 시작한 뒤에도
             위쪽과 아래쪽으로 스크롤할 수 있도록
             이미지 앞뒤에 빈 공간을 둠
         */
@@ -75,16 +75,13 @@
             object-fit: contain;
 
             /*
-                이미지 전체도 처음에는 투명하게 시작
+                처음에는 완전히 투명
             */
             opacity: 0;
 
             /*
-                정중앙에서 위아래로 퍼지는 마스크
-
-                가운데 부분은 보이고,
-                위아래 끝부분은 투명한 형태의
-                세로 그라데이션 마스크임
+                척추 정중앙부터 위아래로
+                부드럽게 퍼지도록 하는 마스크
             */
             -webkit-mask-image:
                 linear-gradient(
@@ -109,8 +106,8 @@
                 );
 
             /*
-                처음에는 마스크의 세로 크기가 작아서
-                척추 정중앙만 희미하게 보이게 됨
+                처음에는 마스크가 가운데의
+                아주 작은 부분만 차지함
             */
             -webkit-mask-size: 100% 2%;
             mask-size: 100% 2%;
@@ -184,12 +181,19 @@
         const spineImage =
             document.querySelector("#spine-image");
 
+        let revealAnimation = null;
+
+        /*
+            새로고침이나 뒤로 가기 시
+            브라우저가 이전 스크롤 위치를
+            자동으로 복원하지 않도록 설정
+        */
         if ("scrollRestoration" in history) {
             history.scrollRestoration = "manual";
         }
 
         /*
-            척추 이미지의 정확한 정중앙을
+            척추 이미지의 정확한 세로 정중앙을
             화면 정중앙에 위치시킴
         */
         function centerSpineImage() {
@@ -209,8 +213,29 @@
         }
 
         /*
+            애니메이션이 끝나면
+            마스크를 완전히 제거해서
+            척추 위아래까지 모두 선명하게 만듦
+        */
+        function finishReveal() {
+            spineImage.style.opacity = "1";
+            spineImage.style.transform = "scale(1)";
+
+            spineImage.style.webkitMaskImage = "none";
+            spineImage.style.maskImage = "none";
+
+            spineImage.style.webkitMaskSize = "";
+            spineImage.style.maskSize = "";
+
+            if (revealAnimation) {
+                revealAnimation.cancel();
+                revealAnimation = null;
+            }
+        }
+
+        /*
             척추 정중앙에서 시작해서
-            위아래 방향으로 동시에 드러나는 애니메이션
+            위아래로 동시에 퍼지는 애니메이션
         */
         function revealSpineImage() {
             centerSpineImage();
@@ -218,11 +243,7 @@
             requestAnimationFrame(() => {
                 requestAnimationFrame(() => {
 
-                    /*
-                        마스크 높이가 2%에서 220%로 커지면서
-                        정중앙에서 위아래로 슈우욱 퍼짐
-                    */
-                    spineImage.animate(
+                    revealAnimation = spineImage.animate(
                         [
                             {
                                 opacity: 0,
@@ -258,7 +279,7 @@
                             }
                         ],
                         {
-                            duration: 4200,
+                            duration: 3200,
                             easing:
                                 "cubic-bezier(0.16, 1, 0.3, 1)",
 
@@ -266,13 +287,18 @@
                         }
                     );
 
+                    revealAnimation.addEventListener(
+                        "finish",
+                        finishReveal,
+                        { once: true }
+                    );
+
                 });
             });
         }
 
         /*
-            척추 이미지가 완전히 로딩된 뒤 실행해야
-            이미지 정중앙을 정확히 계산할 수 있음
+            척추 이미지가 완전히 로딩된 뒤 실행
         */
         if (spineImage.complete) {
             revealSpineImage();
@@ -285,8 +311,21 @@
         }
 
         /*
-            화면 크기가 바뀌면
-            척추 정중앙을 다시 화면 중앙에 맞춤
+            이미지 로딩에 실패했는지 확인하기 위한 처리
+        */
+        spineImage.addEventListener(
+            "error",
+            () => {
+                console.error(
+                    "images/spine.png 파일을 불러오지 못했습니다."
+                );
+            },
+            { once: true }
+        );
+
+        /*
+            화면 크기가 달라지면
+            척추 중앙을 다시 화면 중앙에 맞춤
         */
         window.addEventListener("resize", () => {
             centerSpineImage();
