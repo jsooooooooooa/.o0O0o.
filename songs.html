@@ -785,11 +785,11 @@
         searchResults.innerHTML = "";
 
         if (!items.length) {
-            searchMessage.textContent = "검색 결과가 없습니다.";
+            searchMessage.textContent = "No search results found.";
             return;
         }
 
-        searchMessage.textContent = "추가할 노래를 선택하세요.";
+        searchMessage.textContent = "Select a song to add";
 
         items.forEach((item) => {
             const rawTitle = decodeHtml(item.snippet.title);
