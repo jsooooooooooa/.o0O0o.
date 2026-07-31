@@ -145,6 +145,11 @@
             justify-content: center;
             align-items: flex-start;
 
+            overflow-x: hidden;
+            overflow-y: auto;
+
+            -webkit-overflow-scrolling: touch;
+
             padding:
                 max(30px, env(safe-area-inset-top))
                 max(20px, env(safe-area-inset-right))
@@ -171,7 +176,9 @@
         .search-panel {
             width: 100%;
             max-width: 700px;
+            min-height: 100%;
             padding-top: 5vh;
+            padding-bottom: 80px;
         }
 
         .search-header {
