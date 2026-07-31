@@ -20,6 +20,7 @@
         html {
             width: 100%;
             min-height: 100%;
+
             background: #ece4ce;
             scroll-behavior: auto;
         }
@@ -51,15 +52,78 @@
         }
 
         /*
-            이미지 정중앙에서 시작한 뒤에도
-            위쪽과 아래쪽으로 스크롤할 수 있도록
-            이미지 앞뒤에 빈 공간을 둠
+            페이지 가장 위쪽 여백
         */
-        .scroll-space {
+        .top-space {
             width: 100%;
 
-            height: 55vh;
-            height: 55dvh;
+            height: 40vh;
+            height: 40dvh;
+
+            flex-shrink: 0;
+        }
+
+        /*
+            클릭 가능한 뇌 이미지 영역
+        */
+        #brain-link {
+            display: block;
+
+            width: fit-content;
+            max-width: 90vw;
+
+            cursor: pointer;
+
+            text-decoration: none;
+
+            -webkit-tap-highlight-color: transparent;
+           
+            transform: translateX(23px);
+        }
+
+        #brain-image {
+            display: block;
+
+            width: auto;
+            height: auto;
+
+            max-width: min(65vw, 650px);
+
+            object-fit: contain;
+
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-user-drag: none;
+
+            transition:
+                transform 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+                opacity 0.8s ease;
+
+            transform: scale(1);
+        }
+
+        /*
+            마우스를 올리면 뇌가 아주 살짝 커짐
+        */
+        #brain-link:hover #brain-image {
+            transform: scale(1.025);
+        }
+
+        /*
+            클릭할 때 살짝 작아지는 효과
+        */
+        #brain-link:active #brain-image {
+            transform: scale(0.985);
+        }
+
+        /*
+            뇌와 척추 사이 간격
+        */
+        .brain-spine-space {
+            width: 100%;
+
+            height: -16vh;
+            height: -16dvh;
 
             flex-shrink: 0;
         }
@@ -74,14 +138,10 @@
 
             object-fit: contain;
 
-            /*
-                처음에는 완전히 투명
-            */
             opacity: 0;
 
             /*
-                척추 정중앙부터 위아래로
-                부드럽게 퍼지도록 하는 마스크
+                정중앙부터 위아래로 퍼지는 마스크
             */
             -webkit-mask-image:
                 linear-gradient(
@@ -105,10 +165,6 @@
                     transparent 100%
                 );
 
-            /*
-                처음에는 마스크가 가운데의
-                아주 작은 부분만 차지함
-            */
             -webkit-mask-size: 100% 2%;
             mask-size: 100% 2%;
 
@@ -131,12 +187,34 @@
                 mask-size;
         }
 
+        /*
+            척추 아래쪽으로도 스크롤 가능하게 하는 여백
+        */
+        .bottom-space {
+            width: 100%;
+
+            height: 55vh;
+            height: 55dvh;
+
+            flex-shrink: 0;
+        }
+
         @media (max-width: 700px) {
-            #spine-image {
-                max-width: 88vw;
+            #brain-image {
+                max-width: 82vw;
             }
 
-            .scroll-space {
+            .top-space {
+                height: 30vh;
+                height: 30dvh;
+            }
+
+            .brain-spine-space {
+                height: 25vh;
+                height: 25dvh;
+            }
+
+            .bottom-space {
                 height: 52vh;
                 height: 52dvh;
             }
@@ -150,6 +228,10 @@
                 -webkit-mask-image: none;
                 mask-image: none;
             }
+
+            #brain-image {
+                transition: none;
+            }
         }
     </style>
 </head>
@@ -159,7 +241,28 @@
     <main id="spine-page">
 
         <div
-            class="scroll-space"
+            class="top-space"
+            aria-hidden="true"
+        ></div>
+
+        <!--
+            뇌 이미지를 클릭하면 songs.html로 이동
+        -->
+        <a
+            id="brain-link"
+            href="songs.html"
+            aria-label="좋아하는 노래를 남기는 페이지로 이동"
+        >
+            <img
+                id="brain-image"
+                src="images/brain.png"
+                alt="뇌 드로잉"
+                draggable="false"
+            >
+        </a>
+
+        <div
+            class="brain-spine-space"
             aria-hidden="true"
         ></div>
 
@@ -171,7 +274,7 @@
         >
 
         <div
-            class="scroll-space"
+            class="bottom-space"
             aria-hidden="true"
         ></div>
 
@@ -181,20 +284,22 @@
         const spineImage =
             document.querySelector("#spine-image");
 
+        const brainImage =
+            document.querySelector("#brain-image");
+
         let revealAnimation = null;
 
         /*
-            새로고침이나 뒤로 가기 시
-            브라우저가 이전 스크롤 위치를
-            자동으로 복원하지 않도록 설정
+            새로고침하거나 뒤로 왔을 때
+            이전 스크롤 위치가 자동 복원되지 않게 함
         */
         if ("scrollRestoration" in history) {
             history.scrollRestoration = "manual";
         }
 
         /*
-            척추 이미지의 정확한 세로 정중앙을
-            화면 정중앙에 위치시킴
+            척추 이미지의 정중앙을
+            화면 정중앙에 맞춤
         */
         function centerSpineImage() {
             const imageCenter =
@@ -212,30 +317,23 @@
             });
         }
 
-        /*
-            애니메이션이 끝나면
-            마스크를 완전히 제거해서
-            척추 위아래까지 모두 선명하게 만듦
-        */
-        function finishReveal() {
+       /*
+        등장 애니메이션이 끝난 뒤
+        남아 있는 위아래 마스크를 제거
+       */
+       function finishReveal() {
             spineImage.style.opacity = "1";
             spineImage.style.transform = "scale(1)";
 
-            spineImage.style.webkitMaskImage = "none";
-            spineImage.style.maskImage = "none";
-
-            spineImage.style.webkitMaskSize = "";
-            spineImage.style.maskSize = "";
-
-            if (revealAnimation) {
-                revealAnimation.cancel();
-                revealAnimation = null;
+        if (revealAnimation) {
+            revealAnimation.cancel();
+            revealAnimation = null;
             }
-        }
 
+        }
+        
         /*
-            척추 정중앙에서 시작해서
-            위아래로 동시에 퍼지는 애니메이션
+            척추 정중앙에서 위아래로 퍼지며 등장
         */
         function revealSpineImage() {
             centerSpineImage();
@@ -280,12 +378,55 @@
                         ],
                         {
                             duration: 4200,
+
                             easing:
                                 "cubic-bezier(0.16, 1, 0.3, 1)",
 
                             fill: "forwards"
                         }
                     );
+
+                    revealAnimation = spineImage.animate(
+                        [
+                            {
+                            opacity: 0,
+                            transform: "scale(0.99)",
+                            webkitMaskSize: "100% 2%",
+                            maskSize: "100% 2%"
+                            },
+                            {
+                            opacity: 0.2,
+                            transform: "scale(0.992)",
+                            webkitMaskSize: "100% 20%",
+                            maskSize: "100% 20%",
+                            offset: 0.16
+                            },
+                            {
+                            opacity: 0.72,
+                            transform: "scale(0.998)",
+                            webkitMaskSize: "100% 115%",
+                            maskSize: "100% 115%",
+                            offset: 0.65
+                            },
+                            {
+                            opacity: 1,
+                            transform: "scale(1)",
+                            webkitMaskSize: "100% 220%",
+                            maskSize: "100% 220%"
+                            }
+                        ],
+                        {
+                        duration: 4200,
+                        easing: "cubic-bezier(0.16, 1, 0.3, 1)",
+                        fill: "forwards"
+                        }
+                    );
+
+                    /* 여기부터 추가 */
+                    setTimeout(() => {
+                        spineImage.style.webkitMaskImage = "none";
+                        spineImage.style.maskImage = "none";
+                    }, 1000);
 
                     revealAnimation.addEventListener(
                         "finish",
@@ -298,7 +439,8 @@
         }
 
         /*
-            척추 이미지가 완전히 로딩된 뒤 실행
+            척추 이미지가 완전히 로딩된 후
+            위치 계산과 등장 애니메이션 실행
         */
         if (spineImage.complete) {
             revealSpineImage();
@@ -310,9 +452,6 @@
             );
         }
 
-        /*
-            이미지 로딩에 실패했는지 확인하기 위한 처리
-        */
         spineImage.addEventListener(
             "error",
             () => {
@@ -323,9 +462,19 @@
             { once: true }
         );
 
+        brainImage.addEventListener(
+            "error",
+            () => {
+                console.error(
+                    "images/brain.png 파일을 불러오지 못했습니다."
+                );
+            },
+            { once: true }
+        );
+
         /*
             화면 크기가 달라지면
-            척추 중앙을 다시 화면 중앙에 맞춤
+            척추 중앙을 다시 맞춤
         */
         window.addEventListener("resize", () => {
             centerSpineImage();
