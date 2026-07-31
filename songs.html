@@ -21,7 +21,13 @@
         body {
             width: 100%;
             min-height: 100%;
+
             background: #ece4ce;
+
+             overflow-x: hidden;
+            overflow-y: auto;
+
+            -webkit-text-size-adjust: 100%;
         }
 
         body {
@@ -53,17 +59,23 @@
         main {
             width: 100%;
             max-width: 700px;
+            min-width: 0;
+
             margin: 0 auto;
             padding-top: 12vh;
             text-align: center;
         }
 
         h1 {
+            width: 66.6667%;
+            max-width: 66.6667%;
+
             font-size: clamp(24px, 5vw, 52px);
             font-weight: 400;
             line-height: 1.1;
             letter-spacing: -0.08em;
             text-align: left;
+
             transform:scaleX(1.5);
             transform-origin:left center;
         }
@@ -166,6 +178,20 @@
             line-height: 1.15;
         }
 
+        #song-list,
+        .added-song {
+             width: 100%;
+            min-width: 0;
+        }
+
+        .added-song-title,
+        .added-song-artist {
+            max-width: 100%;
+
+            overflow-wrap: anywhere;
+            word-break: break-word;
+        }
+
         .added-song-artist {
             margin-top: 7px;
             font-size: clamp(7px, 1.3vw, 10px);
@@ -184,7 +210,7 @@
             background: transparent;
 
             transform: translateY(-50%);
-            ursor: pointer;
+            cursor: pointer;
             -webkit-tap-highlight-color: transparent;
         }
 
