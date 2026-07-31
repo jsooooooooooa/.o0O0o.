@@ -338,262 +338,346 @@
     </div>
 
 
-    <script>
-        /*
-            새로 발급한 YouTube API 키를 아래 따옴표 안에 넣어주세요.
+   <script type="module">
+    import {
+        initializeApp
+    } from "https://www.gstatic.com/firebasejs/12.17.0/firebase-app.js";
 
-        */
-        const YOUTUBE_API_KEY = "AIzaSyCrUlVvF0FVlSxrWBgBLI3eLsXDO6uhW4E";
-
-
-        const addButton = document.getElementById("add-button");
-        const overlay = document.getElementById("search-overlay");
-        const closeButton = document.getElementById("close-button");
-
-        const searchForm = document.getElementById("search-form");
-        const searchInput = document.getElementById("search-input");
-        const searchResults = document.getElementById("search-results");
-        const searchMessage = document.getElementById("search-message");
-
-        const songList = document.getElementById("song-list");
+    import {
+        getFirestore,
+        collection,
+        addDoc,
+        onSnapshot,
+        query,
+        orderBy,
+        serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/12.17.0/firebase-firestore.js";
 
 
-        /*
-            현재는 테스트를 위해 브라우저에 노래를 저장합니다.
-            같은 휴대폰·같은 브라우저에서는 새로고침해도 유지됩니다.
-
-            나중에 Firebase를 연결하면 모든 관객이
-            같은 노래 목록을 볼 수 있게 바꿀 수 있습니다.
-        */
-        let savedSongs = JSON.parse(
-            localStorage.getItem("o0O0o-songs") || "[]"
-        );
+    /*
+        YouTube API 키
+    */
+    const YOUTUBE_API_KEY = "AIzaSyCrUlVvF0FVlSxrWBgBLI3eLsXDO6uhW4E";
 
 
-        function openSearch() {
-            overlay.classList.add("open");
-            overlay.setAttribute("aria-hidden", "false");
+    /*
+        새로 만든 Firebase 프로젝트 설정값을
+        아래에 그대로 넣어주세요.
+    */
+    const firebaseConfig = {
+        apiKey: "AIzaSyBBf9hjz8R1Q3yY8cWmha4jtFvQEJNAMUc",
+        authDomain: "o0o0o-598ab.firebaseapp.com",
+        projectId: "o0o0o-598ab",
+        storageBucket: "o0o0o-598ab.firebasestorage.app",
+        messagingSenderId: "786913857298",
+        appId: "1:786913857298:web:a22bea10b56d8621672dcb"
+    };
 
-            document.body.style.overflow = "hidden";
 
-            setTimeout(() => {
-                searchInput.focus();
-            }, 150);
+    /*
+        Firebase / Firestore 시작
+    */
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const songsCollection = collection(db, "songs");
+
+
+    /*
+        HTML 요소
+    */
+    const addButton = document.getElementById("add-button");
+    const overlay = document.getElementById("search-overlay");
+    const closeButton = document.getElementById("close-button");
+
+    const searchForm = document.getElementById("search-form");
+    const searchInput = document.getElementById("search-input");
+    const searchResults = document.getElementById("search-results");
+    const searchMessage = document.getElementById("search-message");
+
+    const songList = document.getElementById("song-list");
+
+
+    /*
+        현재 Firestore에서 받아온 노래 목록
+    */
+    let savedSongs = [];
+
+
+    function openSearch() {
+        overlay.classList.add("open");
+        overlay.setAttribute("aria-hidden", "false");
+
+        document.body.style.overflow = "hidden";
+
+        setTimeout(() => {
+            searchInput.focus();
+        }, 150);
+    }
+
+
+    function closeSearch() {
+        overlay.classList.remove("open");
+        overlay.setAttribute("aria-hidden", "true");
+
+        document.body.style.overflow = "";
+
+        searchInput.value = "";
+        searchResults.innerHTML = "";
+        searchMessage.textContent = "";
+    }
+
+
+    function decodeHtml(text) {
+        const textarea = document.createElement("textarea");
+        textarea.innerHTML = text;
+        return textarea.value;
+    }
+
+
+    function cleanArtistName(channelTitle) {
+        return channelTitle
+            .replace(/\s*-\s*Topic$/i, "")
+            .replace(/\s*VEVO$/i, "")
+            .trim();
+    }
+
+
+    function cleanSongTitle(videoTitle) {
+        return videoTitle
+            .replace(/\s*\(Official\s*(Music\s*)?Video\)/gi, "")
+            .replace(/\s*\[Official\s*(Music\s*)?Video\]/gi, "")
+            .replace(/\s*\(Official\s*Audio\)/gi, "")
+            .replace(/\s*\[Official\s*Audio\]/gi, "")
+            .replace(/\s*\(Lyrics?\)/gi, "")
+            .replace(/\s*\[Lyrics?\]/gi, "")
+            .replace(/\s*\|\s*Official.*$/gi, "")
+            .trim();
+    }
+
+
+    /*
+        Firestore에서 받아온 노래를 화면에 표시
+    */
+    function renderSavedSongs() {
+        songList.innerHTML = "";
+
+        savedSongs.forEach((song) => {
+            const article = document.createElement("article");
+            article.className = "added-song";
+
+            /*
+                나중에 삭제할 때 사용할 Firestore 문서 ID
+            */
+            article.dataset.documentId = song.documentId;
+
+            const title = document.createElement("h2");
+            title.className = "added-song-title";
+            title.textContent = song.title;
+
+            const artist = document.createElement("p");
+            artist.className = "added-song-artist";
+            artist.textContent = song.artist;
+
+            article.append(title, artist);
+            songList.appendChild(article);
+        });
+    }
+
+
+    /*
+        노래를 Firestore에 저장
+    */
+    async function saveSong(song) {
+        const alreadyExists = savedSongs.some((savedSong) => {
+            return savedSong.videoId === song.videoId;
+        });
+
+        if (alreadyExists) {
+            searchMessage.textContent = "이미 추가된 노래입니다.";
+            return;
         }
 
+        searchMessage.textContent = "추가 중...";
 
-        function closeSearch() {
-            overlay.classList.remove("open");
-            overlay.setAttribute("aria-hidden", "true");
-
-            document.body.style.overflow = "";
-
-            searchInput.value = "";
-            searchResults.innerHTML = "";
-            searchMessage.textContent = "";
-        }
-
-
-        function decodeHtml(text) {
-            const textarea = document.createElement("textarea");
-            textarea.innerHTML = text;
-            return textarea.value;
-        }
-
-
-        function cleanArtistName(channelTitle) {
-            return channelTitle
-                .replace(/\s*-\s*Topic$/i, "")
-                .replace(/\s*VEVO$/i, "")
-                .trim();
-        }
-
-
-        function cleanSongTitle(videoTitle) {
-            return videoTitle
-                .replace(/\s*\(Official\s*(Music\s*)?Video\)/gi, "")
-                .replace(/\s*\[Official\s*(Music\s*)?Video\]/gi, "")
-                .replace(/\s*\(Official\s*Audio\)/gi, "")
-                .replace(/\s*\[Official\s*Audio\]/gi, "")
-                .replace(/\s*\(Lyrics?\)/gi, "")
-                .replace(/\s*\[Lyrics?\]/gi, "")
-                .replace(/\s*\|\s*Official.*$/gi, "")
-                .trim();
-        }
-
-
-        function renderSavedSongs() {
-            songList.innerHTML = "";
-
-            savedSongs.forEach((song) => {
-                const article = document.createElement("article");
-                article.className = "added-song";
-
-                const title = document.createElement("h2");
-                title.className = "added-song-title";
-                title.textContent = song.title;
-
-                const artist = document.createElement("p");
-                artist.className = "added-song-artist";
-                artist.textContent = song.artist;
-
-                article.append(title, artist);
-                songList.appendChild(article);
+        try {
+            await addDoc(songsCollection, {
+                title: song.title,
+                artist: song.artist,
+                videoId: song.videoId,
+                createdAt: serverTimestamp()
             });
+
+            closeSearch();
+
+        } catch (error) {
+            console.error("노래 저장 오류:", error);
+
+            searchMessage.textContent =
+                "노래를 저장하지 못했습니다. Firestore 설정을 확인해주세요.";
+        }
+    }
+
+
+    function renderSearchResults(items) {
+        searchResults.innerHTML = "";
+
+        if (!items.length) {
+            searchMessage.textContent = "검색 결과가 없습니다.";
+            return;
         }
 
+        searchMessage.textContent = "추가할 노래를 선택하세요.";
 
-        function saveSong(song) {
-            const alreadyExists = savedSongs.some((savedSong) => {
-                return savedSong.videoId === song.videoId;
+        items.forEach((item) => {
+            const rawTitle = decodeHtml(item.snippet.title);
+            const rawArtist = decodeHtml(item.snippet.channelTitle);
+
+            const song = {
+                title: cleanSongTitle(rawTitle),
+                artist: cleanArtistName(rawArtist),
+                videoId: item.id.videoId
+            };
+
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = "search-result";
+
+            const title = document.createElement("span");
+            title.className = "result-title";
+            title.textContent = song.title;
+
+            const artist = document.createElement("span");
+            artist.className = "result-artist";
+            artist.textContent = song.artist;
+
+            button.append(title, artist);
+
+            button.addEventListener("click", () => {
+                saveSong(song);
             });
 
-            if (alreadyExists) {
-                searchMessage.textContent = "이미 추가된 노래입니다.";
-                return;
+            searchResults.appendChild(button);
+        });
+    }
+
+
+    async function searchYouTube(queryText) {
+        if (
+            !YOUTUBE_API_KEY ||
+            YOUTUBE_API_KEY === "AIzaSyCrUlVvF0FVlSxrWBgBLI3eLsXDO6uhW4E"
+        ) {
+            searchMessage.textContent =
+                "AIzaSyCrUlVvF0FVlSxrWBgBLI3eLsXDO6uhW4E";
+            return;
+        }
+
+        searchMessage.textContent = "검색 중...";
+        searchResults.innerHTML = "";
+
+        const parameters = new URLSearchParams({
+            part: "snippet",
+            type: "video",
+            maxResults: "10",
+            q: queryText,
+            videoCategoryId: "10",
+            key: YOUTUBE_API_KEY
+        });
+
+        const requestUrl =
+            "https://www.googleapis.com/youtube/v3/search?" +
+            parameters.toString();
+
+        try {
+            const response = await fetch(requestUrl);
+            const data = await response.json();
+
+            if (!response.ok) {
+                console.error(data);
+
+                const apiMessage =
+                    data.error?.message ||
+                    "YouTube 검색 중 오류가 발생했습니다.";
+
+                throw new Error(apiMessage);
             }
 
-            savedSongs.unshift(song);
+            renderSearchResults(data.items || []);
 
-            localStorage.setItem(
-                "o0O0o-songs",
-                JSON.stringify(savedSongs)
-            );
+        } catch (error) {
+            console.error(error);
+
+            searchMessage.textContent =
+                "검색하지 못했습니다. API 키 설정을 확인해주세요.";
+        }
+    }
+
+
+    /*
+        Firestore의 songs 컬렉션을 실시간으로 감시
+
+        createdAt이 최신인 노래부터 표시
+    */
+    const songsQuery = query(songsCollection);
+
+    onSnapshot(
+        songsQuery,
+
+        (snapshot) => {
+            savedSongs = snapshot.docs.map((songDocument) => {
+                return {
+                    documentId: songDocument.id,
+                    ...songDocument.data()
+                };
+            });
 
             renderSavedSongs();
+        },
+
+        (error) => {
+            console.error("노래 목록 불러오기 오류:", error);
+
+            songList.innerHTML = `
+                <p style="opacity: 0.6;">
+                    노래 목록을 불러오지 못했습니다.
+                </p>
+            `;
+        }
+    );
+
+
+    addButton.addEventListener("click", openSearch);
+    closeButton.addEventListener("click", closeSearch);
+
+
+    overlay.addEventListener("click", (event) => {
+        if (event.target === overlay) {
             closeSearch();
         }
+    });
 
 
-        function renderSearchResults(items) {
-            searchResults.innerHTML = "";
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+            closeSearch();
+        }
+    });
 
-            if (!items.length) {
-                searchMessage.textContent = "검색 결과가 없습니다.";
-                return;
-            }
 
-            searchMessage.textContent = "추가할 노래를 선택하세요.";
+    searchForm.addEventListener("submit", (event) => {
+        event.preventDefault();
 
-            items.forEach((item) => {
-                const rawTitle = decodeHtml(item.snippet.title);
-                const rawArtist = decodeHtml(item.snippet.channelTitle);
+        const queryText = searchInput.value.trim();
 
-                const song = {
-                    title: cleanSongTitle(rawTitle),
-                    artist: cleanArtistName(rawArtist),
-                    videoId: item.id.videoId
-                };
-
-                const button = document.createElement("button");
-                button.type = "button";
-                button.className = "search-result";
-
-                const title = document.createElement("span");
-                title.className = "result-title";
-                title.textContent = song.title;
-
-                const artist = document.createElement("span");
-                artist.className = "result-artist";
-                artist.textContent = song.artist;
-
-                button.append(title, artist);
-
-                button.addEventListener("click", () => {
-                    saveSong(song);
-                });
-
-                searchResults.appendChild(button);
-            });
+        if (!queryText) {
+            searchMessage.textContent =
+                "노래 제목이나 가수를 입력해주세요.";
+            return;
         }
 
-
-        async function searchYouTube(query) {
-            if (
-                !YOUTUBE_API_KEY ||
-                YOUTUBE_API_KEY === "여기에_새_API_키"
-            ) {
-                searchMessage.textContent =
-                    "코드에 YouTube API 키를 먼저 입력해주세요.";
-                return;
-            }
-
-            searchMessage.textContent = "검색 중...";
-            searchResults.innerHTML = "";
-
-            const parameters = new URLSearchParams({
-                part: "snippet",
-                type: "video",
-                maxResults: "10",
-                q: query,
-                videoCategoryId: "10",
-                key: YOUTUBE_API_KEY
-            });
-
-            const requestUrl =
-                "https://www.googleapis.com/youtube/v3/search?" +
-                parameters.toString();
-
-            try {
-                const response = await fetch(requestUrl);
-                const data = await response.json();
-
-                if (!response.ok) {
-                    console.error(data);
-
-                    const apiMessage =
-                        data.error?.message ||
-                        "YouTube 검색 중 오류가 발생했습니다.";
-
-                    throw new Error(apiMessage);
-                }
-
-                renderSearchResults(data.items || []);
-
-            } catch (error) {
-                console.error(error);
-
-                searchMessage.textContent =
-                    "검색하지 못했습니다. API 키 설정과 사이트 제한을 확인해주세요.";
-            }
-        }
-
-
-        addButton.addEventListener("click", openSearch);
-        closeButton.addEventListener("click", closeSearch);
-
-
-        overlay.addEventListener("click", (event) => {
-            if (event.target === overlay) {
-                closeSearch();
-            }
-        });
-
-
-        document.addEventListener("keydown", (event) => {
-            if (event.key === "Escape") {
-                closeSearch();
-            }
-        });
-
-
-        searchForm.addEventListener("submit", (event) => {
-            event.preventDefault();
-
-            const query = searchInput.value.trim();
-
-            if (!query) {
-                searchMessage.textContent =
-                    "노래 제목이나 가수를 입력해주세요.";
-                return;
-            }
-
-            searchYouTube(query);
-        });
-
-
-        renderSavedSongs();
-    </script>
+        searchYouTube(queryText);
+    });
+</script>
 
 </body>
 </html>
