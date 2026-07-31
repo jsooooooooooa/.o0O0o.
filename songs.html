@@ -104,6 +104,7 @@
         }
 
         .added-song {
+            position: relative;
             text-align: left;
             border-bottom: 1px solid rgba(44, 29, 21, 0.28);
             padding-bottom: 18px;
@@ -132,6 +133,30 @@
             margin-top: 7px;
             font-size: 15px;
             opacity: 0.65;
+        }
+
+        .delete-button{
+            position:absolute;
+            top:2px;
+            right:0;
+
+            width:22px;
+            height:22px;
+
+            border:none;
+            background:none;
+
+            font-size:18px;
+            line-height:1;
+
+            opacity:.35;
+            cursor:pointer;
+
+            transition:opacity .2s ease;
+        }
+
+        .delete-button:hover{
+            opacity:1;
         }
 
         /* 검색창을 덮는 화면 */
@@ -494,56 +519,19 @@
             artist.className = "added-song-artist";
             artist.textContent = song.artist;
 
-            article.append(title, artist);
+            const deleteButton = document.createElement("button");
+            deleteButton.className = "delete-button";
+            deleteButton.type = "button";
+            deleteButton.textContent = "×";
+            deleteButton.setAttribute("aria-label","삭제");
 
+            deleteButton.addEventListener("click",(event)=>{
+                event.stopPropagation();
 
-            /*
-            꾹 누르면 삭제
-            */
-            let pressTimer = null;
-            let startX = 0;
-            let startY = 0;
-
-            function cancelLongPress() {
-                clearTimeout(pressTimer);
-                pressTimer = null;
-
-                article.classList.remove("pressing");
-            }
-
-            article.addEventListener("pointerdown", (event) => {
-                startX = event.clientX;
-                startY = event.clientY;
-
-            article.classList.add("pressing");
-
-                pressTimer = setTimeout(() => {
-                    article.classList.remove("pressing");
-                    deleteSong(song.documentId);
-                }, 700);
+                deleteSong(song.documentId);
             });
 
-            article.addEventListener("pointermove", (event) => {
-                const movedX = Math.abs(event.clientX - startX);
-                const movedY = Math.abs(event.clientY - startY);
-
-                /*
-                화면을 스크롤하려고 손가락을 움직인 경우
-                삭제가 실행되지 않도록 취소
-                */
-                if (movedX > 10 || movedY > 10) {
-                    cancelLongPress();
-                }
-            });
-
-            article.addEventListener("pointerup", cancelLongPress);
-            article.addEventListener("pointercancel", cancelLongPress);
-            article.addEventListener("pointerleave", cancelLongPress);
-
-            article.addEventListener("contextmenu", (event) => {
-                event.preventDefault();
-            });
-
+            article.append(deleteButton, title, artist);
 
             songList.appendChild(article);
         });
@@ -587,7 +575,7 @@
     */
     async function deleteSong(documentId) {
         const shouldDelete = window.confirm(
-            "이 노래를 삭제할까요?"
+            "Delete?"
         );
 
         if (!shouldDelete) {
