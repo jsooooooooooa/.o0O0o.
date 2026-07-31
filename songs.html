@@ -172,6 +172,70 @@
             opacity: 0.6;
         }
 
+        .youtube-button {
+            position: absolute;
+            top: 50%;
+            right: 4px;
+
+            width: 28px;
+            height: 28px;
+
+            border: none;
+            background: transparent;
+
+            transform: translateY(-50%);
+            ursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* 오른쪽을 향하는 테두리 삼각형 */
+        .youtube-button::before {
+            content: "";
+
+            position: absolute;
+            top: 50%;
+            left: 50%;
+
+            width: 14px;
+            height: 16px;
+
+            background: #2c1d15;
+
+            transform: translate(-50%, -50%);
+
+            clip-path: polygon(
+                0 0,
+                100% 50%,
+                0 100%
+            );
+        }
+
+        /* 안쪽을 미색으로 덮어서 테두리만 남김 */
+        .youtube-button::after {
+            content: "";
+
+            position: absolute;
+            top: 50%;
+            left: 48%;
+
+            width: 9px;
+            height: 10px;
+
+            background: #ece4ce;
+
+            transform: translate(-50%, -50%);
+
+            clip-path: polygon(
+                0 0,
+                100% 50%,
+                0 100%
+            );
+        }
+
+    .youtube-button:active::after {
+        display: none;
+    }
+
         /* 검색창을 덮는 화면 */
         #search-overlay {
             position: fixed;
@@ -319,11 +383,11 @@
                 width: 42px;
                 height: 42px;
 
-                margin: 1px 0 0 auto;
+                margin: -3px 0 0 auto;
             }
             
             .added-song-title {
-                margin-bottom: 1px;
+                margin-bottom: 5px;
             }
 
             #song-list {
@@ -545,7 +609,29 @@
             artist.className = "added-song-artist";
             artist.textContent = song.artist;
 
-            article.append(title, artist);
+            const youtubeButton = document.createElement("button");
+
+            youtubeButton.type = "button";
+            youtubeButton.className = "youtube-button";
+            youtubeButton.setAttribute(
+                "aria-label",
+                `${song.title} 유튜브에서 열기`
+            );
+
+            youtubeButton.addEventListener("click", (event) => {
+                event.stopPropagation();
+
+                const youtubeUrl =
+                    `https://www.youtube.com/watch?v=${song.videoId}`;
+
+                window.open(
+                    youtubeUrl,
+                    "_blank",
+                    "noopener,noreferrer"
+                );
+            });
+
+            article.append(title, artist, youtubeButton);
 
             /*
             노래를 0.7초 동안 길게 누르면 삭제
