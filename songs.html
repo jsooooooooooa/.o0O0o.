@@ -107,6 +107,19 @@
             text-align: left;
             border-bottom: 1px solid rgba(44, 29, 21, 0.28);
             padding-bottom: 18px;
+
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: pan-y;
+
+            transition:
+                opacity 0.2s ease,
+                transform 0.2s ease;
+        }
+
+        .added-song.pressing {
+            opacity: 0.45;
+            transform: scale(0.985);
         }
 
         .added-song-title {
@@ -350,7 +363,9 @@
         onSnapshot,
         query,
         orderBy,
-        serverTimestamp
+        serverTimestamp,
+        deleteDoc,
+        doc
     } from "https://www.gstatic.com/firebasejs/12.17.0/firebase-firestore.js";
 
 
@@ -480,6 +495,56 @@
             artist.textContent = song.artist;
 
             article.append(title, artist);
+
+
+            /*
+            꾹 누르면 삭제
+            */
+            let pressTimer = null;
+            let startX = 0;
+            let startY = 0;
+
+            function cancelLongPress() {
+                clearTimeout(pressTimer);
+                pressTimer = null;
+
+                article.classList.remove("pressing");
+            }
+
+            article.addEventListener("pointerdown", (event) => {
+                startX = event.clientX;
+                startY = event.clientY;
+
+            article.classList.add("pressing");
+
+                pressTimer = setTimeout(() => {
+                    article.classList.remove("pressing");
+                    deleteSong(song.documentId);
+                }, 700);
+            });
+
+            article.addEventListener("pointermove", (event) => {
+                const movedX = Math.abs(event.clientX - startX);
+                const movedY = Math.abs(event.clientY - startY);
+
+                /*
+                화면을 스크롤하려고 손가락을 움직인 경우
+                삭제가 실행되지 않도록 취소
+                */
+                if (movedX > 10 || movedY > 10) {
+                    cancelLongPress();
+                }
+            });
+
+            article.addEventListener("pointerup", cancelLongPress);
+            article.addEventListener("pointercancel", cancelLongPress);
+            article.addEventListener("pointerleave", cancelLongPress);
+
+            article.addEventListener("contextmenu", (event) => {
+                event.preventDefault();
+            });
+
+
             songList.appendChild(article);
         });
     }
@@ -515,6 +580,31 @@
 
             searchMessage.textContent =
                 "노래를 저장하지 못했습니다. Firestore 설정을 확인해주세요.";
+        }
+    }
+    /*
+    Firestore에서 노래 삭제
+    */
+    async function deleteSong(documentId) {
+        const shouldDelete = window.confirm(
+            "이 노래를 삭제할까요?"
+        );
+
+        if (!shouldDelete) {
+            return;
+        }
+
+        try {
+            await deleteDoc(
+                doc(db, "songs", documentId)
+            );
+
+        } catch (error) {
+            console.error("노래 삭제 오류:", error);
+
+        window.alert(
+                "노래를 삭제하지 못했습니다."
+            );
         }
     }
 
@@ -565,10 +655,10 @@
     async function searchYouTube(queryText) {
        if (
             !YOUTUBE_API_KEY ||
-            YOUTUBE_API_KEY === "네 YouTube API 키"
+            YOUTUBE_API_KEY === "네 YouTube API 키, 건드리지 말 것"
         ) {
             searchMessage.textContent =
-                "YouTube API 키를 입력해주세요.";
+                "YouTube API 키를 입력해주세요.건드리지 말 것";
             return;
             }
 
