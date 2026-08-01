@@ -1105,34 +1105,13 @@
             drawingsSection.style.height =
                 `${currentY + 80}px`;
 
-            const drawingObserver =
-                new IntersectionObserver(
-                    (entries, observer) => {
-                        entries.forEach((entry) => {
-                            if (!entry.isIntersecting) {
-                                return;
-                            }
-
-                            entry.target.classList.add(
-                                "visible"
-                            );
-
-                            observer.unobserve(
-                                entry.target
-                            );
-                        });
-                    },
-                    {
-                        threshold: 0.08,
-                        rootMargin: "90px 0px"
-                    }
-                );
-
-            drawingsSection
-                .querySelectorAll(".drawing")
-                .forEach((drawing) => {
-                    drawingObserver.observe(drawing);
-                });
+            requestAnimationFrame(() => {
+                document
+                    .querySelectorAll(".drawing")
+                    .forEach((drawing) =>
+                        drawing.classList.add("visible")
+                    );
+            });
 
             return;
         }
