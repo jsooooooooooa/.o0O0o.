@@ -751,6 +751,7 @@
 
             let currentY = 20;
             let previousRowCount = 2;
+            let horizontalGoesLeft = true;
 
             while (drawingsToPlace.length > 0) {
                 /*
@@ -859,7 +860,7 @@
                     }
                 }
 
-                const rowItems = rowDrawings.map(
+                let rowItems = rowDrawings.map(
                     ({ image, ratio }) => {
                         const isHorizontal = ratio >= 1;
 
@@ -875,6 +876,26 @@
                         };
                     }
                 );
+
+                /*
+                    가로+세로 혼합 행은 좌우 순서를 번갈아 배치
+                */
+                if (rowCount === 2) {
+                    const horizontalItem =
+                        rowItems.find((item) => item.ratio >= 1);
+
+                    const verticalItem =
+                        rowItems.find((item) => item.ratio < 1);
+
+                    if (horizontalItem && verticalItem) {
+                        rowItems = horizontalGoesLeft
+                            ? [horizontalItem, verticalItem]
+                            : [verticalItem, horizontalItem];
+
+                        horizontalGoesLeft =
+                            !horizontalGoesLeft;
+                    }
+                }
 
                 let rowBottom = currentY;
 
