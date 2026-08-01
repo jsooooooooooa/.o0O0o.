@@ -432,21 +432,13 @@
     #drawing-detail-text {
         width: 100%;
 
-        margin-top: 30px;
+        margin-top: 22px;
 
         color: var(--text);
         text-align: right;
 
         padding-right: 16px;
         box-sizing: border-box;
-    }
-
-
-    #drawing-detail-title {
-        font-family: serif;
-        font-size: clamp(18px, 3vw, 28px);
-        font-weight: 400;
-        line-height: 1.2;
     }
 
     #drawing-detail-description {
@@ -495,11 +487,7 @@
         }
 
         #drawing-detail-text {
-            margin-top: 24px;
-        }
-
-        #drawing-detail-title {
-            font-size: 18px;
+            margin-top: 22px;
         }
 
         #drawing-detail-description {
@@ -584,7 +572,6 @@
             </div>
 
             <div id="drawing-detail-text">
-                <h2 id="drawing-detail-title"></h2>
                 <p id="drawing-detail-description"></p>
             </div>
         </div>
@@ -697,7 +684,7 @@
                         }
                     );
                     
-                    
+
                     requestAnimationFrame(() => {
                         document
                             .querySelectorAll(".drawing")
@@ -771,9 +758,6 @@
         const drawingDetailImage =
             document.getElementById("drawing-detail-image");
 
-        const drawingDetailTitle =
-            document.getElementById("drawing-detail-title");
-
         const drawingDetailDescription =
             document.getElementById(
                 "drawing-detail-description"
@@ -794,19 +778,12 @@
             const information =
                 drawingDescriptions[fileName] || {};
 
-            const title =
-                information.title ||
-                getDrawingTitle(fileName);
-
             const description =
                 information.description || "";
 
             drawingDetailImage.src =
                 `images/drawings/${fileName}`;
 
-            drawingDetailImage.alt = title;
-
-            drawingDetailTitle.textContent = title;
             drawingDetailDescription.textContent = description;
 
             drawingDetailOverlay.classList.remove(
