@@ -742,6 +742,255 @@
         const shuffledDrawings =
             shuffleArray(loadedDrawings, random);
 
+        /*
+            모바일에서는 행 단위로 배치:
+            한 장짜리 행은 절대 연속되지 않음
+        */
+        if (isMobile) {
+            const drawingsToPlace = [...shuffledDrawings];
+
+            let currentY = 20;
+            let previousRowCount = 2;
+
+            while (drawingsToPlace.length > 0) {
+                /*
+                    직전 행이 1장이었다면 이번 행은 무조건 2장.
+                    직전 행이 2장이었다면 1장 또는 2장 중 랜덤.
+                */
+                let rowCount;
+
+                if (previousRowCount === 1) {
+                    rowCount = 2;
+                } else {
+                    rowCount = random() < 0.42 ? 1 : 2;
+                }
+
+                rowCount = Math.min(
+                    rowCount,
+                    drawingsToPlace.length
+                );
+
+                const rowDrawings =
+                    drawingsToPlace.splice(0, rowCount);
+
+                const rowItems = rowDrawings.map(
+                    ({ image, ratio }) => {
+                        const isHorizontal = ratio >= 1;
+
+                        const width = isHorizontal
+                            ? sectionWidth * 0.42
+                            : sectionWidth * 0.294;
+
+                        return {
+                            image,
+                            ratio,
+                            width,
+                            height: width / ratio
+                        };
+                    }
+                );
+
+                let rowBottom = currentY;
+
+                /*
+                    한 장짜리 행
+                */
+                if (rowCount === 1) {
+                    const item = rowItems[0];
+
+                    const maximumX =
+                        sectionWidth -
+                        item.width -
+                        edgePadding;
+
+                    /*
+                        화면 중앙에만 놓이지 않게
+                        왼쪽·중앙·오른쪽 범위를 랜덤 선택
+                    */
+                    const zones = [
+                        edgePadding,
+                        sectionWidth * 0.28,
+                        maximumX
+                    ];
+
+                    let x =
+                        zones[
+                            Math.floor(random() * zones.length)
+                        ];
+
+                    x +=
+                        (random() - 0.5) *
+                        sectionWidth *
+                        0.12;
+
+                    x = Math.max(
+                        edgePadding,
+                        Math.min(maximumX, x)
+                    );
+
+                    const rotation =
+                        random() < 0.25
+                            ? 0
+                            : -1.8 + random() * 3.6;
+
+                    item.image.style.width =
+                        `${item.width}px`;
+
+                    item.image.style.left =
+                        `${x}px`;
+
+                    item.image.style.top =
+                        `${currentY}px`;
+
+                    item.image.style.setProperty(
+                        "--drawing-rotation",
+                        `${rotation}deg`
+                    );
+
+                    drawingsSection.appendChild(
+                        item.image
+                    );
+
+                    rowBottom =
+                        currentY + item.height;
+                }
+
+                /*
+                    두 장짜리 행
+                */
+                if (rowCount === 2) {
+                    const first = rowItems[0];
+                    const second = rowItems[1];
+
+                    const sidePadding = edgePadding;
+
+                    /*
+                        두 그림을 좌우에 놓되,
+                        각 행마다 좌우 위치와 높이를 조금씩 다르게
+                    */
+                    const firstX =
+                        sidePadding +
+                        random() *
+                        sectionWidth *
+                        0.08;
+
+                    const secondX =
+                        sectionWidth -
+                        second.width -
+                        sidePadding -
+                        random() *
+                        sectionWidth *
+                        0.08;
+
+                    /*
+                        같은 수평선에 정확히 맞지 않게
+                        한쪽을 위아래로 어긋나게 함
+                    */
+                    const stagger =
+                        12 + random() * 38;
+
+                    const firstGoesDown =
+                        random() < 0.5;
+
+                    const firstY =
+                        currentY +
+                        (firstGoesDown ? stagger : 0);
+
+                    const secondY =
+                        currentY +
+                        (firstGoesDown ? 0 : stagger);
+
+                    [first, second].forEach(
+                        (item, index) => {
+                            const x =
+                                index === 0
+                                    ? firstX
+                                    : secondX;
+
+                            const y =
+                                index === 0
+                                    ? firstY
+                                    : secondY;
+
+                            const rotation =
+                                random() < 0.25
+                                    ? 0
+                                    : -1.8 +
+                                    random() * 3.6;
+
+                            item.image.style.width =
+                                `${item.width}px`;
+
+                            item.image.style.left =
+                                `${x}px`;
+
+                            item.image.style.top =
+                                `${y}px`;
+
+                            item.image.style.setProperty(
+                                "--drawing-rotation",
+                                `${rotation}deg`
+                            );
+
+                            drawingsSection.appendChild(
+                                item.image
+                            );
+                        }
+                    );
+
+                    rowBottom = Math.max(
+                        firstY + first.height,
+                        secondY + second.height
+                    );
+                }
+
+                previousRowCount = rowCount;
+
+                /*
+                    다음 행과의 간격도 조금씩 불규칙하게
+                    너무 벌어지지 않도록 작은 값 사용
+                */
+                currentY =
+                    rowBottom +
+                    12 +
+                    random() * 24;
+            }
+
+            drawingsSection.style.height =
+                `${currentY + 80}px`;
+
+            const drawingObserver =
+                new IntersectionObserver(
+                    (entries, observer) => {
+                        entries.forEach((entry) => {
+                            if (!entry.isIntersecting) {
+                                return;
+                            }
+
+                            entry.target.classList.add(
+                                "visible"
+                            );
+
+                            observer.unobserve(
+                                entry.target
+                            );
+                        });
+                    },
+                    {
+                        threshold: 0.08,
+                        rootMargin: "90px 0px"
+                    }
+                );
+
+            drawingsSection
+                .querySelectorAll(".drawing")
+                .forEach((drawing) => {
+                    drawingObserver.observe(drawing);
+                });
+
+            return;
+        }
+
         const placedRectangles = [];
 
         /*
