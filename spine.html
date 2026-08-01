@@ -862,7 +862,7 @@
 
                                 const minimumDistance =
                                     isMobile
-                                        ? sectionWidth * 0.22
+                                        ? sectionWidth * 0.38
                                         : sectionWidth * 0.15;
 
                                 if (distance < minimumDistance) {
@@ -875,7 +875,8 @@
                                             minimumDistance -
                                             distance
                                         ) *
-                                        (recentCenters.length - index);
+                                        (recentCenters.length - index)*
+                                        (isMobile ? 4 : 1);
                                 }
                             }
                         );
@@ -973,7 +974,7 @@
                 /*
                 최근 4장의 가로 위치만 기억
                 */
-                if (recentCenters.length > 4) {
+                if (recentCenters.length > 6) {
                     recentCenters.shift();
                 }
 
