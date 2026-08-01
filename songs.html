@@ -11,6 +11,35 @@
     <title>.o0O0o. — songs</title>
 
     <style>
+
+        :root {
+
+            /* Background */
+            --bg: #A9A8A3;
+            --bg-transparent: rgba(216, 211, 200, 0.98);
+
+            
+            /* Text */
+            --text: #342A22;
+             --text-light: rgba(52, 42, 34, 0.65);
+        
+
+
+            /* Lines */
+            --line: #342A22;
+
+            --line-soft: rgba(52, 42, 34, 0.28);
+            --line-faint: rgba(52, 42, 34, 0.25);
+            --text-muted: rgba(52, 42, 34, 0.6);
+            --placeholder: rgba(52, 42, 34, 0.45);
+
+
+            /* Hover */
+            --hover: rgba(52,42,34,.08);
+
+        }
+
+        
         * {
             margin: 0;
             padding: 0;
@@ -22,7 +51,7 @@
             width: 100%;
             min-height: 100%;
 
-            background: #ece4ce;
+            background: var(--bg);
 
              overflow-x: hidden;
             overflow-y: auto;
@@ -40,7 +69,7 @@
                 max(40px, env(safe-area-inset-bottom))
                 max(24px, env(safe-area-inset-left));
 
-            color: #2c1d15;
+            color: var(--text);
             font-family: serif;
         }
 
@@ -89,7 +118,7 @@
             margin:1px 0 0 auto;
 
             border:none;
-            background:#ece4ce;
+            background:var(--bg);
 
             cursor:pointer;
             -webkit-tap-highlight-color:transparent;
@@ -109,7 +138,7 @@
                 42% 42%
             );
 
-            box-shadow:0 0 0 1.4px #2c1d15 inset;
+            box-shadow:0 0 0 1.4px var(--line) inset;
 
             transition:
                 background-color .18s ease,
@@ -117,14 +146,14 @@
         }
 
         #add-button:active{
-            background:#2c1d15;
+            background:var(--line);
 
             transform:scale(.95);
         }
 
         #add-button:hover {
-            background: #2c1d15;
-            color: #ece4ce;
+            background: var(--line);
+            color: var(--bg);
             transform: rotate(90deg);
         }
 
@@ -132,7 +161,7 @@
 
             #add-button:hover{
 
-                background:#2c1d15;
+                background:var(--line);
 
             }
 
@@ -149,7 +178,7 @@
 
         .added-song {
             text-align: left;
-            border-bottom: 1px solid rgba(44, 29, 21, 0.28);
+            border-bottom: 1px solid var(--line-soft);
             padding-bottom: 18px;
 
             user-select: none;
@@ -195,7 +224,7 @@
         .added-song-artist {
             margin-top: 7px;
             font-size: clamp(7px, 1.3vw, 10px);
-            opacity: 0.6;
+            color: var(--text-muted);
         }
 
         .youtube-button {
@@ -225,7 +254,7 @@
             width: 14px;
             height: 16px;
 
-            background: #2c1d15;
+            background: var(--line);
 
             transform: translate(-50%, -50%);
 
@@ -247,7 +276,7 @@
             width: 11px;
             height: 13px;
 
-            background: #ece4ce;
+            background: var(--bg);
 
             transform: translate(-50%, -50%);
 
@@ -283,7 +312,7 @@
                 max(30px, env(safe-area-inset-bottom))
                 max(20px, env(safe-area-inset-left));
 
-            background: rgba(236, 228, 206, 0.98);
+            background: var(--bg-transparent);
 
             opacity: 0;
             visibility: hidden;
@@ -319,7 +348,7 @@
             display: flex;
             align-items: center;
 
-            border-bottom: 1px solid #2c1d15;
+            border-bottom: 1px solid var(--line);
         }
 
         #search-input {
@@ -336,7 +365,7 @@
         }
 
         #search-input::placeholder {
-            color: rgba(44, 29, 21, 0.45);
+            color: var(--placeholder);
         }
 
         #close-button {
@@ -356,7 +385,7 @@
             margin-top: 24px;
             text-align: left;
             font-size: 12px;
-            opacity: 0.65;
+            color: var(--text-light);
         }
 
         #search-results {
@@ -372,7 +401,7 @@
             width: 100%;
             padding: 20px 4px;
 
-            border-bottom: 1px solid rgba(44, 29, 21, 0.25);
+            border-bottom: 1px solid var(--line-faint);
 
             text-align: left;
 
@@ -398,7 +427,7 @@
 
             margin-top: 7px;
             font-size: clamp(7px, 1.3vw, 10px);
-            opacity: 0.6;
+            color: var(--text-muted);
         }
 
         @media (max-width: 600px) {
@@ -414,7 +443,7 @@
                 width: 42px;
                 height: 42px;
 
-                box-shadow: 0 0 0 0.9px #2c1d15 inset;
+                box-shadow: 0 0 0 0.9px var(--line) inset;
 
                 margin: -10px 0 0 auto;
             }

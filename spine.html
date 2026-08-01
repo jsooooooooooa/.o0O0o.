@@ -11,6 +11,33 @@
     <title>.o0O0o. — spine</title>
 
     <style>
+
+        :root {
+
+            /* Background */
+            --bg: #A9A8A3;
+            --bg-transparent: rgba(216, 211, 200, 0.98);
+
+            
+            /* Text */
+            --text: #342A22;
+
+
+            /* Lines */
+            --line: #342A22;
+
+            --line-soft: rgba(52, 42, 34, 0.28);
+            --line-faint: rgba(52, 42, 34, 0.25);
+            --text-muted: rgba(52, 42, 34, 0.6);
+            --placeholder: rgba(52, 42, 34, 0.45);
+
+
+            /* Hover */
+            --hover: rgba(52,42,34,.08);
+
+        }
+
+
         * {
             margin: 0;
             padding: 0;
@@ -21,7 +48,7 @@
             width: 100%;
             min-height: 100%;
 
-            background: #ece4ce;
+            background: var(--bg);
             scroll-behavior: auto;
         }
 
@@ -32,7 +59,7 @@
             overflow-x: hidden;
             overflow-y: auto;
 
-            background: #ece4ce;
+            background: var(--bg);
 
             -webkit-overflow-scrolling: touch;
         }
@@ -48,7 +75,7 @@
             flex-direction: column;
             align-items: center;
 
-            background: #ece4ce;
+            background: var(--bg);
         }
 
         /*
@@ -295,16 +322,7 @@
             }
         }
 
-        .drawing.visible {
-            opacity: 1;
-        }
-
-        @media (hover: hover) {
-            .drawing:hover {
-                z-index: 10;
-                transform: scale(1.025) !important;
-            }
-        }
+       
     </style>
 </head>
 
