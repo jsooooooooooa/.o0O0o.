@@ -773,7 +773,7 @@
                 let rowDrawings;
 
                 /*
-                    1장짜리 행에는 가로 그림만 배치
+                    1장짜리 행에는 가로 그림만
                 */
                 if (rowCount === 1) {
                     const horizontalIndex =
@@ -781,9 +781,6 @@
                             ({ ratio }) => ratio >= 1
                         );
 
-                    /*
-                        남아 있는 가로 그림이 있으면 그 그림을 꺼냄
-                    */
                     if (horizontalIndex !== -1) {
                         rowDrawings = drawingsToPlace.splice(
                             horizontalIndex,
@@ -791,20 +788,75 @@
                         );
                     } else {
                         /*
-                            가로 그림이 다 떨어졌으면
-                            남은 그림은 2장짜리 행으로 배치
+                            가로 그림이 없으면
+                            1장 행을 만들지 않고 2장 행으로 변경
                         */
                         rowCount = Math.min(
                             2,
                             drawingsToPlace.length
                         );
+                    }
+                }
+
+
+                /*
+                    2장짜리 행:
+                    가로+가로 또는 가로+세로만 허용
+                */
+                if (rowCount === 2) {
+                    const firstHorizontalIndex =
+                        drawingsToPlace.findIndex(
+                            ({ ratio }) => ratio >= 1
+                        );
+
+                    /*
+                        가로 그림이 하나라도 있으면
+                        무조건 첫 번째로 꺼냄
+                    */
+                    if (firstHorizontalIndex !== -1) {
+                        const firstHorizontal =
+                            drawingsToPlace.splice(
+                                firstHorizontalIndex,
+                                1
+                            )[0];
+
+                        /*
+                            두 번째 그림은 남은 것 중 아무거나
+                            → 가로 또는 세로
+                        */
+                        const verticalIndex =
+                            drawingsToPlace.findIndex(
+                                ({ ratio }) => ratio < 1
+                            );
+
+                        let secondDrawing;
+
+                        if (verticalIndex !== -1) {
+                            secondDrawing =
+                                drawingsToPlace.splice(
+                                    verticalIndex,
+                                    1
+                                )[0];
+                        } else {
+                            secondDrawing =
+                                drawingsToPlace.splice(0, 1)[0];
+                        }
+
+                        rowDrawings = [
+                            firstHorizontal,
+                            secondDrawing
+                        ].filter(Boolean);
+                    } else {
+                        /*
+                            남은 그림이 전부 세로라면
+                            세로+세로를 만들지 않기 위해
+                            남은 그림을 한 장씩 처리
+                        */
+                        rowCount = 1;
 
                         rowDrawings =
-                            drawingsToPlace.splice(0, rowCount);
+                            drawingsToPlace.splice(0, 1);
                     }
-                } else {
-                    rowDrawings =
-                        drawingsToPlace.splice(0, rowCount);
                 }
 
                 const rowItems = rowDrawings.map(
