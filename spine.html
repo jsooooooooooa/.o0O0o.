@@ -122,7 +122,7 @@
         .brain-spine-space {
             width: 100%;
 
-            height: -5vh;
+            height: 0;
             margin-bottom: -5dvh;
 
             flex-shrink: 0;
@@ -210,8 +210,8 @@
             }
 
             .brain-spine-space {
-                height: -10vh;
-                height: -10dvh;
+                height: 0;
+                margin-bottom: -10dvh;
             }
 
             .bottom-space {
@@ -231,6 +231,49 @@
 
             #brain-image {
                 transition: none;
+            }
+        }
+
+        #drawings {
+            position: relative;
+
+            width: 100%;
+            max-width: 900px;
+            min-height: 100vh;
+
+            margin: 0 auto;
+            overflow: hidden;
+        }
+
+        .drawing {
+            position: absolute;
+            display: block;
+
+            width: auto;
+            height: auto;
+
+            object-fit: contain;
+
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-user-drag: none;
+
+            opacity: 0;
+            transform-origin: center;
+
+            transition:
+                opacity 0.7s ease,
+                transform 0.3s ease;
+        }
+
+        .drawing.visible {
+            opacity: 1;
+        }
+
+        @media (hover: hover) {
+            .drawing:hover {
+                z-index: 10;
+                transform: scale(1.025) !important;
             }
         }
     </style>
@@ -277,6 +320,8 @@
             class="bottom-space"
             aria-hidden="true"
         ></div>
+
+        <section id="drawings"></section>
 
     </main>
 
@@ -384,43 +429,7 @@
 
                             fill: "forwards"
                         }
-                    );
-
-                    revealAnimation = spineImage.animate(
-                        [
-                            {
-                            opacity: 0,
-                            transform: "scale(0.99)",
-                            webkitMaskSize: "100% 2%",
-                            maskSize: "100% 2%"
-                            },
-                            {
-                            opacity: 0.2,
-                            transform: "scale(0.992)",
-                            webkitMaskSize: "100% 20%",
-                            maskSize: "100% 20%",
-                            offset: 0.16
-                            },
-                            {
-                            opacity: 0.72,
-                            transform: "scale(0.998)",
-                            webkitMaskSize: "100% 115%",
-                            maskSize: "100% 115%",
-                            offset: 0.65
-                            },
-                            {
-                            opacity: 1,
-                            transform: "scale(1)",
-                            webkitMaskSize: "100% 220%",
-                            maskSize: "100% 220%"
-                            }
-                        ],
-                        {
-                        duration: 4200,
-                        easing: "cubic-bezier(0.16, 1, 0.3, 1)",
-                        fill: "forwards"
-                        }
-                    );
+                    );                   
 
                     /* 여기부터 추가 */
                     setTimeout(() => {
@@ -472,7 +481,474 @@
             { once: true }
         );
 
+
+
+            /*
+            드로잉 나열
+            */
+       const drawingsSection =
+            document.getElementById("drawings");
+
+
+        /*
+        드로잉 이미지 70장
+        파일 이름과 확장자는 실제 파일과 정확히 같아야 함
+        */
+        const drawingFiles = [
+            "H01_바람.jpeg",
+            "H02_물가.jpeg",
+            "H03_나뭇잎.jpeg",
+            "H04_비행기.jpeg",
+            "H05_볼펜.jpeg",
+            "H06_티비.jpeg",
+            "H07_이젤.jpeg",
+            "H08_선풍기.jpeg",
+            "H09_향수.jpeg",
+            "H10_얼음.jpeg",
+            "H11_팝콘.jpeg",
+            "H12_채점.jpeg",
+            "H13_기타.jpeg",
+            "H14_커터칼.jpeg",
+            "H15_카메라.jpeg",
+            "H16_가위질.jpeg",
+            "H17_비닐.jpeg",
+            "H18_초인종.jpeg",
+            "H19_지퍼.jpeg",
+            "H20_우산.jpeg",
+            "H21_충전기.jpeg",
+            "H22_집게.jpeg",
+            "H23_서랍.jpeg",
+            "H24_타자.jpeg",
+            "H25_예원_무용.jpeg",
+            "H26_버스.jpeg",
+            "H27_눈.jpeg",
+            "H28_시계.jpeg",
+
+            "V01_파도.jpeg",
+            "V02_자갈.jpeg",
+            "V03_라이브_진동.jpeg",
+            "V04_웃음.jpeg",
+            "V05_구두.jpeg",
+            "V06_공항.jpeg",
+            "V07_맨발.jpeg",
+            "V08_쿠션.jpeg",
+            "V09_마우스.jpeg",
+            "V10_소묘.jpeg",
+            "V11_책.jpeg",
+            "V12_학교종.jpeg",
+            "V13_에어팟.jpeg",
+            "V14_숨.jpeg",
+            "V15_튜닝.jpeg",
+            "V16_약.jpeg",
+            "V17_영화관.jpeg",
+            "V18_키보드.jpeg",
+            "V19_긴테.jpeg",
+            "V20_알림.jpeg",
+            "V21_물통_붓.jpeg",
+            "V22_라이브_대기.jpeg",
+            "V23_승무원.jpeg",
+            "V24_핸드폰_전원.jpeg",
+            "V25_연필_깎기.jpeg",
+            "V26_개.jpeg",
+            "V27_손톱.jpeg",
+            "V28_먹.jpeg",
+            "V29_수저.jpeg",
+            "V30_실기실.jpeg",
+            "V31_에어드랍.jpeg",
+            "V32_비행기_내부.jpeg",
+            "V33_급식실.jpeg",
+            "V34_반가운_목소리.jpeg",
+            "V35_타지에서.jpeg",
+            "V36_이불.jpeg",
+            "V37_좋아하는.jpeg",
+            "V38_지하철.jpeg",
+            "V39_창문_바람.jpeg",
+            "V40_파우치.jpeg",
+            "V41_매미.jpeg",
+            "V42_비.jpeg"
+        ];
+
+
+        /*
+        새로고침해도 같은 랜덤 배치가 나오게 하는
+        고정 랜덤 숫자 생성기
+        */
+        function createSeededRandom(seed) {
+            let value = seed;
+
+            return function random() {
+                value |= 0;
+                value = value + 0x6D2B79F5 | 0;
+
+                let result = Math.imul(
+                    value ^ value >>> 15,
+                    1 | value
+                );
+
+            result =
+                result +
+                Math.imul(
+                    result ^ result >>> 7,
+                    61 | result
+                ) ^
+                result;
+
+            return (
+                (result ^ result >>> 14) >>> 0
+            ) / 4294967296;
+        };
+    }
+
+
+    function shuffleArray(array, random) {
+        const copiedArray = [...array];
+
+        for (
+            let index = copiedArray.length - 1;
+            index > 0;
+            index--
+        ) {
+            const randomIndex =
+                Math.floor(random() * (index + 1));
+
+            [
+                copiedArray[index],
+                copiedArray[randomIndex]
+            ] = [
+                copiedArray[randomIndex],
+                copiedArray[index]
+            ];
+        }
+
+        return copiedArray;
+    }
+
+
+    function loadDrawing(fileName) {
+        return new Promise((resolve) => {
+            const image = new Image();
+
+            image.className = "drawing";
+            image.src =
+                `images/drawings/${fileName}`;
+
+            image.alt = fileName
+                .replace(/\.[^.]+$/, "")
+                .replace(/^[HV]\d+_?/, "")
+                .replaceAll("_", " ");
+
+            image.draggable = false;
+
+            image.addEventListener(
+                "load",
+                () => {
+                    resolve({
+                        fileName,
+                        image,
+                        ratio:
+                            image.naturalWidth /
+                            image.naturalHeight
+                    });
+                },
+                { once: true }
+            );
+
+            image.addEventListener(
+                "error",
+                () => {
+                    console.error(
+                        `이미지를 불러오지 못했습니다: ${fileName}`
+                    );
+
+                    resolve(null);
+                },
+                { once: true }
+            );
+        });
+    }
+
+
+    /*
+    두 이미지가 서로 겹치는지 확인
+    */
+    function rectanglesOverlap(first, second, gap) {
+        return !(
+            first.x + first.width + gap <= second.x ||
+            second.x + second.width + gap <= first.x ||
+            first.y + first.height + gap <= second.y ||
+            second.y + second.height + gap <= first.y
+        );
+    }
+
+
+    let loadedDrawings = [];
+    let resizeTimer = null;
+
+
+    function arrangeDrawings() {
+        if (!loadedDrawings.length) {
+            return;
+        }
+
+        drawingsSection.innerHTML = "";
+
+        const sectionWidth =
+            drawingsSection.clientWidth;
+
+        const isMobile =
+            window.innerWidth <= 600;
+
+        const edgePadding =
+            isMobile ? 10 : 20;
+
+        const collisionGap =
+            isMobile ? 10 : 18;
+
+        const random =
+            createSeededRandom(240831);
+
+        const shuffledDrawings =
+            shuffleArray(loadedDrawings, random);
+
+        const placedRectangles = [];
+
+        let searchY = 30;
+        let furthestBottom = 0;
+
+
+        shuffledDrawings.forEach(
+            ({ image, ratio }) => {
+
+                const isHorizontal =
+                    ratio >= 1;
+
+                /*
+                휴대폰과 컴퓨터에서 각각 크기 지정
+                */
+                let imageWidth;
+
+                if (isMobile) {
+                    if (isHorizontal) {
+                        imageWidth =
+                            sectionWidth *
+                            (0.38 + random() * 0.08);
+                    } else {
+                        imageWidth =
+                            sectionWidth *
+                            (0.25 + random() * 0.07);
+                    }
+                } else {
+                    if (isHorizontal) {
+                        imageWidth =
+                            sectionWidth *
+                            (0.24 + random() * 0.07);
+                    } else {
+                        imageWidth =
+                            sectionWidth *
+                            (0.16 + random() * 0.06);
+                    }
+                }
+
+                const imageHeight =
+                    imageWidth / ratio;
+
+                let position = null;
+                let candidateY = searchY;
+
+                /*
+                빈 공간을 찾아 최대 500회 배치 시도
+                */
+                for (
+                    let attempt = 0;
+                    attempt < 500;
+                    attempt++
+                ) {
+                    const maximumX =
+                        Math.max(
+                            edgePadding,
+                            sectionWidth -
+                            imageWidth -
+                            edgePadding
+                        );
+
+                    const candidateX =
+                        edgePadding +
+                        random() *
+                        Math.max(
+                            0,
+                            maximumX - edgePadding
+                        );
+
+                    const rectangle = {
+                        x: candidateX,
+                        y:
+                            candidateY +
+                            random() *
+                            (isMobile ? 65 : 95),
+                        width: imageWidth,
+                        height: imageHeight
+                    };
+
+                    const overlaps =
+                        placedRectangles.some(
+                            (placedRectangle) => {
+                                return rectanglesOverlap(
+                                    rectangle,
+                                    placedRectangle,
+                                    collisionGap
+                                );
+                            }
+                        );
+
+                    if (!overlaps) {
+                        position = rectangle;
+                        break;
+                    }
+
+                    /*
+                    빈자리를 못 찾으면 조금 아래에서 다시 탐색
+                    */
+                    if (attempt % 35 === 34) {
+                        candidateY +=
+                            isMobile ? 45 : 65;
+                    }
+                }
+
+                /*
+                드물게 빈자리를 못 찾으면
+                가장 아래에 배치
+                */
+                if (!position) {
+                    position = {
+                        x:
+                            edgePadding +
+                            random() *
+                            Math.max(
+                                0,
+                                sectionWidth -
+                                imageWidth -
+                                edgePadding * 2
+                            ),
+                        y:
+                            furthestBottom +
+                            collisionGap,
+                        width: imageWidth,
+                        height: imageHeight
+                    };
+                }
+
+                placedRectangles.push(position);
+
+                furthestBottom =
+                    Math.max(
+                        furthestBottom,
+                        position.y +
+                        position.height
+                    );
+
+                /*
+                다음 이미지는 현재 최하단보다
+                너무 멀리 내려가지 않도록 설정
+                */
+                searchY =
+                    Math.max(
+                        20,
+                        furthestBottom -
+                        (isMobile ? 260 : 360)
+                    );
+
+                const rotation =
+                    -1.2 + random() * 2.4;
+
+                image.style.width =
+                    `${position.width}px`;
+
+                image.style.left =
+                    `${position.x}px`;
+
+                image.style.top =
+                    `${position.y}px`;
+
+                image.style.transform =
+                    `rotate(${rotation}deg)`;
+
+                drawingsSection.appendChild(image);
+            }
+        );
+
+
+        /*
+        마지막 이미지 아래에만 작은 여백 추가
+        */
+        drawingsSection.style.height =
+            `${furthestBottom + (isMobile ? 100 : 160)}px`;
+
+
+        /*
+        화면에 들어오는 이미지부터 서서히 표시
+        */
+        const drawingObserver =
+            new IntersectionObserver(
+                (entries, observer) => {
+                    entries.forEach((entry) => {
+                        if (!entry.isIntersecting) {
+                            return;
+                        }
+
+                        entry.target.classList.add(
+                        "visible"
+                        );
+
+                        observer.unobserve(
+                        entry.target
+                        );
+                    });
+                },
+                {
+                threshold: 0.08,
+                rootMargin: "80px 0px"
+                }
+            );
+
+        drawingsSection
+            .querySelectorAll(".drawing")
+            .forEach((drawing) => {
+            drawingObserver.observe(drawing);
+            });
+    }
+
+
+    async function initializeDrawings() {
+        const loadedResults =
+            await Promise.all(
+                drawingFiles.map(loadDrawing)
+            );
+
+        loadedDrawings =
+            loadedResults.filter(Boolean);
+
+        arrangeDrawings();
+    }
+
+
+    initializeDrawings();
+
+
+    /*
+    화면 방향이나 크기가 실제로 크게 바뀐 경우에만
+    드로잉을 다시 배치
+    */
+    window.addEventListener("resize", () => {
+        clearTimeout(resizeTimer);
+
+        resizeTimer = setTimeout(() => {
+            arrangeDrawings();
+        }, 250);
+    });
+
     </script>
 
+
 </body>
+
 </html>
