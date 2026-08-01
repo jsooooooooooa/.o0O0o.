@@ -803,26 +803,18 @@
                         item.width -
                         edgePadding;
 
-                    /*
-                        화면 중앙에만 놓이지 않게
-                        왼쪽·중앙·오른쪽 범위를 랜덤 선택
-                    */
-                    const zones = [
-                        edgePadding,
-                        sectionWidth * 0.28,
-                        maximumX
-                    ];
+                    const center =
+                        (sectionWidth - item.width) / 2;
 
                     let x =
-                        zones[
-                            Math.floor(random() * zones.length)
-                        ];
-
-                    x +=
+                        center +
                         (random() - 0.5) *
                         sectionWidth *
-                        0.12;
+                        0.22;
 
+                    /*
+                        혹시라도 화면 밖으로 나가지 않게 제한
+                    */
                     x = Math.max(
                         edgePadding,
                         Math.min(maximumX, x)
