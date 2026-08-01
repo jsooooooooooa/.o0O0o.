@@ -259,11 +259,40 @@
             -webkit-user-drag: none;
 
             opacity: 0;
+
+            /*
+            JS에서 각 이미지의 회전값을 여기에 저장
+            */
+            --drawing-rotation: 0deg;
+
+            transform:
+                translateY(12px)
+                rotate(var(--drawing-rotation));
+
             transform-origin: center;
 
             transition:
-                opacity 0.7s ease,
-                transform 0.3s ease;
+                opacity 0.75s ease,
+                transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .drawing.visible {
+            opacity: 1;
+
+            transform:
+                translateY(0)
+                rotate(var(--drawing-rotation));
+        }
+
+        @media (hover: hover) {
+            .drawing:hover {
+                z-index: 10;
+
+                transform:
+                    translateY(0)
+                    rotate(var(--drawing-rotation))
+                    scale(1.025);
+            }
         }
 
         .drawing.visible {
@@ -704,6 +733,9 @@
         const collisionGap =
             isMobile ? 10 : 18;
 
+        /*
+        이 숫자를 바꾸면 전체 배치가 달라짐
+        */
         const random =
             createSeededRandom(731204);
 
@@ -712,18 +744,25 @@
 
         const placedRectangles = [];
 
+        /*
+        최근 그림들의 가로 중심점을 저장해서
+        같은 세로열이 반복되는 것을 방지
+        */
+        const recentCenters = [];
+
         let searchY = 30;
         let furthestBottom = 0;
 
 
         shuffledDrawings.forEach(
-            ({ image, ratio }) => {
+            ({ image, ratio }, drawingIndex) => {
 
                 const isHorizontal =
                     ratio >= 1;
 
                 /*
-                휴대폰과 컴퓨터에서 각각 크기 지정
+                모든 종이의 실제 크기가 같아 보이도록
+                긴 변 길이를 통일
                 */
                 let imageWidth;
 
@@ -731,11 +770,11 @@
                     imageWidth = isHorizontal
                         ? sectionWidth * 0.42
                         : sectionWidth * 0.294;
-                    } else {
-                        imageWidth = isHorizontal
-                            ? sectionWidth * 0.28
-                            : sectionWidth * 0.196;
-                    }
+                } else {
+                    imageWidth = isHorizontal
+                        ? sectionWidth * 0.28
+                        : sectionWidth * 0.196;
+                }
 
                 const imageHeight =
                     imageWidth / ratio;
@@ -743,89 +782,201 @@
                 let position = null;
                 let candidateY = searchY;
 
+
                 /*
-                빈 공간을 찾아 최대 500회 배치 시도
+                여러 후보 중 첫 번째 빈자리만 쓰지 않고,
+                비교적 좋은 위치 후보들을 수집
                 */
                 for (
-                    let attempt = 0;
-                    attempt < 500;
-                    attempt++
+                    let verticalStep = 0;
+                    verticalStep < 16;
+                    verticalStep++
                 ) {
-                    const maximumX =
-                        Math.max(
-                            edgePadding,
-                            sectionWidth -
-                            imageWidth -
-                            edgePadding
-                        );
+                    const candidates = [];
 
-                    const candidateX =
-                        edgePadding +
-                        random() *
-                        Math.max(
-                            0,
-                            maximumX - edgePadding
-                        );
+                    for (
+                        let attempt = 0;
+                        attempt < 40;
+                        attempt++
+                    ) {
+                        const maximumX =
+                            Math.max(
+                                edgePadding,
+                                sectionWidth -
+                                imageWidth -
+                                edgePadding
+                            );
 
-                    const rectangle = {
-                        x: candidateX,
-                        y:
-                            candidateY +
-                            random() *
-                            (isMobile ? 65 : 95),
-                        width: imageWidth,
-                        height: imageHeight
-                    };
-
-                    const overlaps =
-                        placedRectangles.some(
-                            (placedRectangle) => {
-                                return rectanglesOverlap(
-                                    rectangle,
-                                    placedRectangle,
-                                    collisionGap
-                                );
-                            }
-                        );
-
-                    if (!overlaps) {
-                        position = rectangle;
-                        break;
-                    }
-
-                    /*
-                    빈자리를 못 찾으면 조금 아래에서 다시 탐색
-                    */
-                    if (attempt % 35 === 34) {
-                        candidateY +=
-                            isMobile ? 45 : 65;
-                    }
-                }
-
-                /*
-                드물게 빈자리를 못 찾으면
-                가장 아래에 배치
-                */
-                if (!position) {
-                    position = {
-                        x:
+                        const candidateX =
                             edgePadding +
                             random() *
                             Math.max(
                                 0,
-                                sectionWidth -
-                                imageWidth -
-                                edgePadding * 2
-                            ),
+                                maximumX - edgePadding
+                            );
+
+                        const rectangle = {
+                            x: candidateX,
+
+                            y:
+                                candidateY +
+                                random() *
+                                (isMobile ? 70 : 100),
+
+                            width: imageWidth,
+                            height: imageHeight
+                        };
+
+                        const overlaps =
+                            placedRectangles.some(
+                                (placedRectangle) => {
+                                    return rectanglesOverlap(
+                                        rectangle,
+                                        placedRectangle,
+                                        collisionGap
+                                    );
+                                }
+                            );
+
+                        if (overlaps) {
+                            continue;
+                        }
+
+                        const candidateCenter =
+                            rectangle.x +
+                            rectangle.width / 2;
+
+                        /*
+                        최근 이미지들과 가로 중심이 비슷할수록
+                        높은 벌점을 줌
+                        */
+                        let alignmentPenalty = 0;
+
+                        recentCenters.forEach(
+                            (recentCenter, index) => {
+                                const distance =
+                                    Math.abs(
+                                        candidateCenter -
+                                        recentCenter
+                                    );
+
+                                const minimumDistance =
+                                    isMobile
+                                        ? sectionWidth * 0.22
+                                        : sectionWidth * 0.15;
+
+                                if (distance < minimumDistance) {
+                                    /*
+                                    가장 최근 그림일수록
+                                    더 강하게 피함
+                                    */
+                                    alignmentPenalty +=
+                                        (
+                                            minimumDistance -
+                                            distance
+                                        ) *
+                                        (recentCenters.length - index);
+                                }
+                            }
+                        );
+
+                        /*
+                        화면 한가운데로만 몰리는 것도 살짝 방지
+                        */
+                        const pageCenter =
+                            sectionWidth / 2;
+
+                        const centerDistance =
+                            Math.abs(
+                                candidateCenter -
+                                pageCenter
+                            );
+
+                        const centerPenalty =
+                            centerDistance <
+                            sectionWidth * 0.08
+                                ? 18
+                                : 0;
+
+                        /*
+                        완전히 규칙적이지 않도록
+                        작은 랜덤값도 점수에 포함
+                        */
+                        const score =
+                            alignmentPenalty +
+                            centerPenalty +
+                            random() * 20;
+
+                        candidates.push({
+                            rectangle,
+                            score
+                        });
+                    }
+
+                    if (candidates.length) {
+                        /*
+                        점수가 가장 낮은,
+                        즉 세로 정렬이 가장 덜한 위치 선택
+                        */
+                        candidates.sort(
+                            (first, second) =>
+                                first.score - second.score
+                        );
+
+                        position =
+                            candidates[0].rectangle;
+
+                        break;
+                    }
+
+                    candidateY +=
+                        isMobile ? 45 : 65;
+                }
+
+
+                /*
+                적당한 빈자리를 찾지 못했을 경우
+                현재 최하단 아래에 배치
+                */
+                if (!position) {
+                    const maximumX =
+                        Math.max(
+                            0,
+                            sectionWidth -
+                            imageWidth -
+                            edgePadding * 2
+                        );
+
+                    position = {
+                        x:
+                            edgePadding +
+                            random() * maximumX,
+
                         y:
                             furthestBottom +
                             collisionGap,
+
                         width: imageWidth,
                         height: imageHeight
                     };
                 }
 
+
                 placedRectangles.push(position);
+
+                const positionCenter =
+                    position.x +
+                    position.width / 2;
+
+                recentCenters.push(positionCenter);
+
+                /*
+                최근 4장의 가로 위치만 기억
+                */
+                if (recentCenters.length > 4) {
+                    recentCenters.shift();
+                }
+
 
                 furthestBottom =
                     Math.max(
@@ -835,18 +986,30 @@
                     );
 
                 /*
-                다음 이미지는 현재 최하단보다
-                너무 멀리 내려가지 않도록 설정
+                너무 넓은 공백 없이
+                다음 그림의 탐색 위치를 설정
                 */
                 searchY =
                     Math.max(
                         20,
                         furthestBottom -
-                        (isMobile ? 260 : 360)
+                        (isMobile ? 250 : 350)
                     );
 
-                const rotation =
-                    -1.2 + random() * 2.4;
+
+                /*
+                일부는 수평,
+                나머지는 아주 조금씩만 회전
+                */
+                let rotation;
+
+                if (drawingIndex % 4 === 0) {
+                    rotation = 0;
+                } else {
+                    rotation =
+                        -1.8 + random() * 3.6;
+                }
+
 
                 image.style.width =
                     `${position.width}px`;
@@ -857,23 +1020,26 @@
                 image.style.top =
                     `${position.y}px`;
 
-                image.style.transform =
-                    `rotate(${rotation}deg)`;
+                /*
+                transform을 직접 지정하지 않고
+                CSS 변수로 회전값 전달
+                */
+                image.style.setProperty(
+                    "--drawing-rotation",
+                    `${rotation}deg`
+                );
 
                 drawingsSection.appendChild(image);
             }
         );
 
 
-        /*
-        마지막 이미지 아래에만 작은 여백 추가
-        */
         drawingsSection.style.height =
             `${furthestBottom + (isMobile ? 100 : 160)}px`;
 
 
         /*
-        화면에 들어오는 이미지부터 서서히 표시
+        화면에 들어오는 그림만 등장
         */
         const drawingObserver =
             new IntersectionObserver(
@@ -884,24 +1050,24 @@
                         }
 
                         entry.target.classList.add(
-                        "visible"
+                            "visible"
                         );
 
                         observer.unobserve(
-                        entry.target
+                            entry.target
                         );
                     });
                 },
                 {
-                threshold: 0.08,
-                rootMargin: "80px 0px"
+                    threshold: 0.08,
+                    rootMargin: "90px 0px"
                 }
             );
 
         drawingsSection
             .querySelectorAll(".drawing")
             .forEach((drawing) => {
-            drawingObserver.observe(drawing);
+                drawingObserver.observe(drawing);
             });
     }
 
