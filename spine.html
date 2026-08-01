@@ -421,11 +421,17 @@
         margin: 0 auto;
     }
 
-    /* 세로 그림: 위쪽 왼쪽 */
+    /* 세로 그림: 위쪽 오른쪽 */
+    #drawing-detail-overlay.vertical
+    #drawing-detail-image-wrap {
+        display: flex;
+        justify-content: flex-end;
+    }
+
     #drawing-detail-overlay.vertical
     #drawing-detail-image {
         max-width: min(50vw, 420px);
-        margin: 0 auto 0 0;
+        margin: 0;
     }
 
     #drawing-detail-text {
@@ -435,6 +441,11 @@
 
         color: var(--text);
         text-align: left;
+    }
+
+    #drawing-detail-overlay.vertical
+    #drawing-detail-text {
+        text-align: right;
     }
 
     #drawing-detail-title {
@@ -491,6 +502,16 @@
             margin-top: 13px;
             font-size: 13px;
             line-height: 1.7;
+        }
+
+        #drawing-detail-overlay.vertical
+        #drawing-detail-text {
+            width: 55vw;
+
+            margin-left: auto;
+            margin-right: 0;
+
+            text-align: right;
         }
     }    
 
