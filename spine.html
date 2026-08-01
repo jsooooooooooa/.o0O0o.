@@ -728,26 +728,14 @@
                 let imageWidth;
 
                 if (isMobile) {
-                    if (isHorizontal) {
-                        imageWidth =
-                            sectionWidth *
-                            (0.38 + random() * 0.08);
+                    imageWidth = isHorizontal
+                        ? sectionWidth * 0.42
+                        : sectionWidth * 0.294;
                     } else {
-                        imageWidth =
-                            sectionWidth *
-                            (0.25 + random() * 0.07);
+                        imageWidth = isHorizontal
+                            ? sectionWidth * 0.28
+                            : sectionWidth * 0.196;
                     }
-                } else {
-                    if (isHorizontal) {
-                        imageWidth =
-                            sectionWidth *
-                            (0.24 + random() * 0.07);
-                    } else {
-                        imageWidth =
-                            sectionWidth *
-                            (0.16 + random() * 0.06);
-                    }
-                }
 
                 const imageHeight =
                     imageWidth / ratio;
