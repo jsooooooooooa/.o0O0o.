@@ -770,8 +770,42 @@
                     drawingsToPlace.length
                 );
 
-                const rowDrawings =
-                    drawingsToPlace.splice(0, rowCount);
+                let rowDrawings;
+
+                /*
+                    1장짜리 행에는 가로 그림만 배치
+                */
+                if (rowCount === 1) {
+                    const horizontalIndex =
+                        drawingsToPlace.findIndex(
+                            ({ ratio }) => ratio >= 1
+                        );
+
+                    /*
+                        남아 있는 가로 그림이 있으면 그 그림을 꺼냄
+                    */
+                    if (horizontalIndex !== -1) {
+                        rowDrawings = drawingsToPlace.splice(
+                            horizontalIndex,
+                            1
+                        );
+                    } else {
+                        /*
+                            가로 그림이 다 떨어졌으면
+                            남은 그림은 2장짜리 행으로 배치
+                        */
+                        rowCount = Math.min(
+                            2,
+                            drawingsToPlace.length
+                        );
+
+                        rowDrawings =
+                            drawingsToPlace.splice(0, rowCount);
+                    }
+                } else {
+                    rowDrawings =
+                        drawingsToPlace.splice(0, rowCount);
+                }
 
                 const rowItems = rowDrawings.map(
                     ({ image, ratio }) => {
