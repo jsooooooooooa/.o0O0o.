@@ -16,7 +16,7 @@
 
             /* Background */
             --bg: #A9A8A3;
-            --bg-transparent: rgba(216, 211, 200, 0.98);
+            --bg-transparent: rgba(169, 168, 163, 0.98);
 
             
             /* Text */
@@ -671,47 +671,38 @@
     }
 
 
-    function loadDrawing(fileName) {
-        return new Promise((resolve) => {
-            const image = new Image();
+    function createDrawing(fileName) {
+        const image = new Image();
 
-            image.className = "drawing";
-            image.src =
-                `images/drawings/${fileName}`;
+        image.className = "drawing";
+        image.src = `images/drawings/${fileName}`;
 
-            image.alt = fileName
-                .replace(/\.[^.]+$/, "")
-                .replace(/^[HV]\d+_?/, "")
-                .replaceAll("_", " ");
+        image.alt = fileName
+            .replace(/\.[^.]+$/, "")
+            .replace(/^[HV]\d+_?/, "")
+            .replaceAll("_", " ");
 
-            image.draggable = false;
+        image.draggable = false;
 
-            image.addEventListener(
-                "load",
-                () => {
-                    resolve({
-                        fileName,
-                        image,
-                        ratio:
-                            image.naturalWidth /
-                            image.naturalHeight
-                    });
-                },
-                { once: true }
-            );
+        /*
+            실제 이미지 로딩을 기다리지 않고
+            파일명의 H/V를 이용해 종이 비율 지정
+        */
+        const ratio = fileName.startsWith("H")
+            ? 15 / 10.5
+            : 10.5 / 15;
 
-            image.addEventListener(
-                "error",
-                () => {
-                    console.error(
-                        `이미지를 불러오지 못했습니다: ${fileName}`
-                    );
-
-                    resolve(null);
-                },
-                { once: true }
+        image.addEventListener("error", () => {
+            console.error(
+                `이미지를 불러오지 못했습니다: ${fileName}`
             );
         });
+
+        return {
+            fileName,
+            image,
+            ratio
+        };
     }
 
 
@@ -1428,14 +1419,13 @@
     }
 
 
-    async function initializeDrawings() {
-        const loadedResults =
-            await Promise.all(
-                drawingFiles.map(loadDrawing)
-            );
-
+    function initializeDrawings() {
+        /*
+            이미지 70장의 다운로드 완료를 기다리지 않고
+            요소를 즉시 생성하고 바로 배치
+        */
         loadedDrawings =
-            loadedResults.filter(Boolean);
+            drawingFiles.map(createDrawing);
 
         arrangeDrawings();
     }
