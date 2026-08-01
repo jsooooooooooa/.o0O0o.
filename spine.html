@@ -360,30 +360,6 @@
         pointer-events: auto;
     }
 
-    #drawing-detail-close {
-        position: fixed;
-        z-index: 2;
-
-        top: max(15px, env(safe-area-inset-top));
-        right: max(17px, env(safe-area-inset-right));
-
-        width: 44px;
-        height: 44px;
-
-        border: 0;
-        padding: 0;
-        background: transparent;
-
-        color: var(--text);
-        font-family: serif;
-        font-size: 31px;
-        font-weight: 300;
-        line-height: 1;
-
-        cursor: pointer;
-        -webkit-tap-highlight-color: transparent;
-    }
-
     #drawing-detail-inner {
         width: 100%;
         max-width: 760px;
@@ -581,13 +557,6 @@
         id="drawing-detail-overlay"
         aria-hidden="true"
     >
-        <button
-            id="drawing-detail-close"
-            type="button"
-            aria-label="설명 닫기"
-        >
-            ×
-        </button>
 
         <div id="drawing-detail-inner">
             <div id="drawing-detail-image-wrap">
@@ -773,9 +742,6 @@
 
         const drawingDetailOverlay =
             document.getElementById("drawing-detail-overlay");
-
-        const drawingDetailClose =
-            document.getElementById("drawing-detail-close");
 
         const drawingDetailImage =
             document.getElementById("drawing-detail-image");
@@ -1803,13 +1769,15 @@
     initializeDrawings();
 
 
-    /*
-    드로잉 상세보기 닫기 버튼
-    */
-    drawingDetailClose.addEventListener(
+    drawingDetailOverlay.addEventListener(
         "click",
-        closeDrawingDetail
+        (event) => {
+            if (event.target === drawingDetailOverlay) {
+                closeDrawingDetail();
+            }
+        }
     );
+
 
     document.addEventListener("keydown", (event) => {
         if (
