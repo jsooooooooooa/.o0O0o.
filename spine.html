@@ -352,12 +352,25 @@
         transition:
             opacity 0.3s ease,
             visibility 0.3s ease;
+
+        transform: translateY(0);
+        touch-action: pan-y;
     }
 
     #drawing-detail-overlay.open {
         opacity: 1;
         visibility: visible;
         pointer-events: auto;
+    }
+
+    #drawing-detail-overlay.dragging {
+        transition: none;
+    }
+
+    #drawing-detail-overlay.closing-by-swipe {
+        transition:
+            transform 0.25s ease,
+            opacity 0.25s ease;
     }
 
     #drawing-detail-inner {
@@ -816,18 +829,28 @@
 
 
         function closeDrawingDetail() {
-            drawingDetailOverlay.classList.remove("open");
+            drawingDetailOverlay.classList.remove(
+                "open",
+                "dragging",
+                "closing-by-swipe"
+            );
+
             drawingDetailOverlay.setAttribute(
                 "aria-hidden",
                 "true"
             );
+
+            drawingDetailOverlay.style.transform =
+                "translateY(0)";
+
+            drawingDetailOverlay.style.opacity = "";
 
             document.body.style.position = "";
             document.body.style.top = "";
             document.body.style.width = "";
 
             window.scrollTo(0, drawingDetailScrollY);
-        }    
+        }
 
 
         /*
@@ -1772,6 +1795,9 @@
     initializeDrawings();
 
 
+    /*
+    드로잉 상세보기 닫기
+    */
     drawingDetailOverlay.addEventListener(
         "click",
         (event) => {
@@ -1803,6 +1829,161 @@
         }
     });
 
+    /*
+    드로잉 상세보기 닫기: 스와이프 제스처
+    */
+    let detailTouchStartY = 0;
+    let detailTouchCurrentY = 0;
+    let detailTouchStartTime = 0;
+    let isDetailDragging = false;
+
+
+    drawingDetailOverlay.addEventListener(
+        "touchstart",
+        (event) => {
+            /*
+                상세 화면이 열려 있지 않으면 실행하지 않음
+            */
+            if (
+                !drawingDetailOverlay.classList.contains("open")
+            ) {
+                return;
+            }
+
+            /*
+                상세 화면을 아래로 스크롤한 상태에서는
+                먼저 위로 되돌아온 뒤 스와이프 닫기 가능
+            */
+            if (drawingDetailOverlay.scrollTop > 0) {
+                return;
+            }
+
+            const touch = event.touches[0];
+
+            detailTouchStartY = touch.clientY;
+            detailTouchCurrentY = touch.clientY;
+            detailTouchStartTime = Date.now();
+            isDetailDragging = false;
+        },
+        { passive: true }
+    );
+
+
+    drawingDetailOverlay.addEventListener(
+        "touchmove",
+        (event) => {
+            if (
+                !drawingDetailOverlay.classList.contains("open")
+            ) {
+                return;
+            }
+
+            if (drawingDetailOverlay.scrollTop > 0) {
+                return;
+            }
+
+            const touch = event.touches[0];
+
+            detailTouchCurrentY = touch.clientY;
+
+            const distance =
+                detailTouchCurrentY - detailTouchStartY;
+
+            /*
+                위로 미는 동작은 무시
+            */
+            if (distance <= 0) {
+                return;
+            }
+
+            /*
+                조금 움직인 정도는 일반 터치로 처리
+            */
+            if (distance > 8) {
+                isDetailDragging = true;
+            }
+
+            if (!isDetailDragging) {
+                return;
+            }
+
+            event.preventDefault();
+
+            drawingDetailOverlay.classList.add("dragging");
+
+            drawingDetailOverlay.style.transform =
+                `translateY(${distance}px)`;
+
+            /*
+                아래로 내릴수록 아주 조금 투명해짐
+            */
+            const opacity =
+                Math.max(
+                    0.35,
+                    1 - distance / window.innerHeight
+                );
+
+            drawingDetailOverlay.style.opacity =
+                String(opacity);
+        },
+        { passive: false }
+    );
+
+
+    drawingDetailOverlay.addEventListener(
+        "touchend",
+        () => {
+            if (!isDetailDragging) {
+                return;
+            }
+
+            const distance =
+                detailTouchCurrentY - detailTouchStartY;
+
+            const elapsed =
+                Math.max(
+                    1,
+                    Date.now() - detailTouchStartTime
+                );
+
+            const velocity =
+                distance / elapsed;
+
+            drawingDetailOverlay.classList.remove("dragging");
+
+            /*
+                120px 이상 내렸거나
+                빠르게 아래로 휙 내렸으면 닫기
+            */
+            if (
+                distance > 120 ||
+                velocity > 0.65
+            ) {
+                drawingDetailOverlay.classList.add(
+                    "closing-by-swipe"
+                );
+
+                drawingDetailOverlay.style.transform =
+                    "translateY(100dvh)";
+
+                drawingDetailOverlay.style.opacity = "0";
+
+                setTimeout(() => {
+                    closeDrawingDetail();
+                }, 250);
+            } else {
+                /*
+                    충분히 내리지 않았다면 원위치
+                */
+                drawingDetailOverlay.style.transform =
+                    "translateY(0)";
+
+                drawingDetailOverlay.style.opacity = "1";
+            }
+
+            isDetailDragging = false;
+        }
+    );
 
     /*
     화면 방향이나 크기가 실제로 크게 바뀐 경우에만
