@@ -695,7 +695,16 @@
 
                             fill: "forwards"
                         }
-                    );                   
+                    );
+                    
+                    
+                    requestAnimationFrame(() => {
+                        document
+                            .querySelectorAll(".drawing")
+                            .forEach((drawing) => {
+                                drawing.classList.add("visible");
+                            });
+});
 
                     /* 여기부터 추가 */
                     setTimeout(() => {
@@ -1456,13 +1465,7 @@
             drawingsSection.style.height =
                 `${currentY + 80}px`;
 
-            requestAnimationFrame(() => {
-                document
-                    .querySelectorAll(".drawing")
-                    .forEach((drawing) =>
-                        drawing.classList.add("visible")
-                    );
-            });
+
 
             return;
         }
@@ -1763,17 +1766,6 @@
         drawingsSection.style.height =
             `${furthestBottom + (isMobile ? 100 : 160)}px`;
 
-
-        /*
-        화면에 들어오는 그림만 등장
-        */
-        requestAnimationFrame(() => {
-            drawingsSection
-                .querySelectorAll(".drawing")
-                .forEach((drawing) => {
-                    drawing.classList.add("visible");
-                });
-        });
 
         return;
     }
