@@ -414,14 +414,20 @@
         -webkit-user-drag: none;
     }
 
-    /* 가로 그림: 위쪽 중앙 */
+    /* 가로 그림 */
+    #drawing-detail-overlay.horizontal
+    #drawing-detail-image-wrap {
+        display: flex;
+        justify-content: flex-end;
+    }
+
     #drawing-detail-overlay.horizontal
     #drawing-detail-image {
         max-width: min(78vw, 650px);
-        margin: 0 auto;
+        margin: 0;
     }
 
-    /* 세로 그림: 위쪽 오른쪽 */
+    /* 세로 그림 */
     #drawing-detail-overlay.vertical
     #drawing-detail-image-wrap {
         display: flex;
@@ -440,13 +446,9 @@
         margin-top: 30px;
 
         color: var(--text);
-        text-align: left;
-    }
-
-    #drawing-detail-overlay.vertical
-    #drawing-detail-text {
         text-align: right;
     }
+
 
     #drawing-detail-title {
         font-family: serif;
@@ -479,15 +481,25 @@
         }
 
         #drawing-detail-overlay.horizontal
+        #drawing-detail-image-wrap,
+        #drawing-detail-overlay.vertical
+        #drawing-detail-image-wrap {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        #drawing-detail-overlay.horizontal
         #drawing-detail-image {
             max-width: 86vw;
             max-height: 48dvh;
+            margin: 0;
         }
 
         #drawing-detail-overlay.vertical
         #drawing-detail-image {
             max-width: 55vw;
             max-height: 53dvh;
+            margin: 0;
         }
 
         #drawing-detail-text {
