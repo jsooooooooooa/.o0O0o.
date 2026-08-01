@@ -946,7 +946,7 @@
     const drawingDescriptions = {
         "H01_바람.jpeg": {
             title: "바람",
-            description: "여기에 바람 드로잉에 대한 설명을 입력합니다."
+            description: "바람이 부는 날"
         },
 
         "H02_물가.jpeg": {
@@ -1775,9 +1775,21 @@
     drawingDetailOverlay.addEventListener(
         "click",
         (event) => {
-            if (event.target === drawingDetailOverlay) {
-                closeDrawingDetail();
+            /*
+                이미지나 제목·설명을 누른 경우에는 닫지 않음
+            */
+            if (
+                event.target.closest(
+                    "#drawing-detail-image, #drawing-detail-text"
+                )
+            ) {
+                return;
             }
+
+            /*
+                그 외의 빈 배경을 누르면 닫음
+            */
+            closeDrawingDetail();
         }
     );
 
