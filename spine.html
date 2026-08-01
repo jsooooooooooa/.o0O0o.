@@ -245,6 +245,14 @@
                 height: 3vh;
                 height: 3dvh;
             }
+
+            .drawing {
+                opacity: 1;
+
+                transform:
+                    translateY(0)
+                    rotate(var(--drawing-rotation));
+            }
         }
 
         @media (prefers-reduced-motion: reduce) {
