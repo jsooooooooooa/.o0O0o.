@@ -323,7 +323,177 @@
             }
         }
 
-       
+    
+    .drawing {
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    #drawing-detail-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 1000;
+
+        overflow-x: hidden;
+        overflow-y: auto;
+
+        padding:
+            max(24px, env(safe-area-inset-top))
+            max(22px, env(safe-area-inset-right))
+            max(50px, env(safe-area-inset-bottom))
+            max(22px, env(safe-area-inset-left));
+
+        background: var(--bg);
+
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+
+        transition:
+            opacity 0.3s ease,
+            visibility 0.3s ease;
+    }
+
+    #drawing-detail-overlay.open {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+    }
+
+    #drawing-detail-close {
+        position: fixed;
+        z-index: 2;
+
+        top: max(15px, env(safe-area-inset-top));
+        right: max(17px, env(safe-area-inset-right));
+
+        width: 44px;
+        height: 44px;
+
+        border: 0;
+        padding: 0;
+        background: transparent;
+
+        color: var(--text);
+        font-family: serif;
+        font-size: 31px;
+        font-weight: 300;
+        line-height: 1;
+
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    #drawing-detail-inner {
+        width: 100%;
+        max-width: 760px;
+        min-height: 100%;
+
+        margin: 0 auto;
+        padding-top: 42px;
+    }
+
+    #drawing-detail-image-wrap {
+        width: 100%;
+    }
+
+    #drawing-detail-image {
+        display: block;
+
+        width: auto;
+        height: auto;
+
+        max-width: 100%;
+        max-height: 58vh;
+        max-height: 58dvh;
+
+        object-fit: contain;
+
+        user-select: none;
+        -webkit-user-select: none;
+        -webkit-user-drag: none;
+    }
+
+    /* 가로 그림: 위쪽 중앙 */
+    #drawing-detail-overlay.horizontal
+    #drawing-detail-image {
+        max-width: min(78vw, 650px);
+        margin: 0 auto;
+    }
+
+    /* 세로 그림: 위쪽 왼쪽 */
+    #drawing-detail-overlay.vertical
+    #drawing-detail-image {
+        max-width: min(50vw, 420px);
+        margin: 0 auto 0 0;
+    }
+
+    #drawing-detail-text {
+        width: 100%;
+
+        margin-top: 30px;
+
+        color: var(--text);
+        text-align: left;
+    }
+
+    #drawing-detail-title {
+        font-family: serif;
+        font-size: clamp(18px, 3vw, 28px);
+        font-weight: 400;
+        line-height: 1.2;
+    }
+
+    #drawing-detail-description {
+        margin-top: 16px;
+
+        font-family: serif;
+        font-size: clamp(13px, 1.7vw, 17px);
+        line-height: 1.75;
+
+        white-space: pre-line;
+    }
+
+    @media (max-width: 700px) {
+        #drawing-detail-overlay {
+            padding:
+                max(20px, env(safe-area-inset-top))
+                max(18px, env(safe-area-inset-right))
+                max(44px, env(safe-area-inset-bottom))
+                max(18px, env(safe-area-inset-left));
+        }
+
+        #drawing-detail-inner {
+            padding-top: 38px;
+        }
+
+        #drawing-detail-overlay.horizontal
+        #drawing-detail-image {
+            max-width: 86vw;
+            max-height: 48dvh;
+        }
+
+        #drawing-detail-overlay.vertical
+        #drawing-detail-image {
+            max-width: 55vw;
+            max-height: 53dvh;
+        }
+
+        #drawing-detail-text {
+            margin-top: 24px;
+        }
+
+        #drawing-detail-title {
+            font-size: 18px;
+        }
+
+        #drawing-detail-description {
+            margin-top: 13px;
+            font-size: 13px;
+            line-height: 1.7;
+        }
+    }    
+
     </style>
 </head>
 
@@ -372,6 +542,36 @@
         <section id="drawings"></section>
 
     </main>
+
+
+    <div
+        id="drawing-detail-overlay"
+        aria-hidden="true"
+    >
+        <button
+            id="drawing-detail-close"
+            type="button"
+            aria-label="설명 닫기"
+        >
+            ×
+        </button>
+
+        <div id="drawing-detail-inner">
+            <div id="drawing-detail-image-wrap">
+                <img
+                    id="drawing-detail-image"
+                    src=""
+                    alt=""
+                >
+            </div>
+
+            <div id="drawing-detail-text">
+                <h2 id="drawing-detail-title"></h2>
+                <p id="drawing-detail-description"></p>
+            </div>
+        </div>
+    </div>
+
 
     <script>
         const spineImage =
@@ -538,6 +738,96 @@
             document.getElementById("drawings");
 
 
+        const drawingDetailOverlay =
+            document.getElementById("drawing-detail-overlay");
+
+        const drawingDetailClose =
+            document.getElementById("drawing-detail-close");
+
+        const drawingDetailImage =
+            document.getElementById("drawing-detail-image");
+
+        const drawingDetailTitle =
+            document.getElementById("drawing-detail-title");
+
+        const drawingDetailDescription =
+            document.getElementById(
+                "drawing-detail-description"
+            );
+
+        let drawingDetailScrollY = 0;
+
+
+        function getDrawingTitle(fileName) {
+            return fileName
+                .replace(/\.[^.]+$/, "")
+                .replace(/^[HV]\d+_?/, "")
+                .replaceAll("_", " ");
+        }
+
+
+        function openDrawingDetail(fileName, ratio) {
+            const information =
+                drawingDescriptions[fileName] || {};
+
+            const title =
+                information.title ||
+                getDrawingTitle(fileName);
+
+            const description =
+                information.description || "";
+
+            drawingDetailImage.src =
+                `images/drawings/${fileName}`;
+
+            drawingDetailImage.alt = title;
+
+            drawingDetailTitle.textContent = title;
+            drawingDetailDescription.textContent = description;
+
+            drawingDetailOverlay.classList.remove(
+                "horizontal",
+                "vertical"
+            );
+
+            drawingDetailOverlay.classList.add(
+                ratio >= 1
+                    ? "horizontal"
+                    : "vertical"
+            );
+
+            drawingDetailScrollY = window.scrollY;
+
+            document.body.style.position = "fixed";
+            document.body.style.top =
+                `-${drawingDetailScrollY}px`;
+            document.body.style.width = "100%";
+
+            drawingDetailOverlay.classList.add("open");
+            drawingDetailOverlay.setAttribute(
+                "aria-hidden",
+                "false"
+            );
+
+            drawingDetailOverlay.scrollTop = 0;
+        }
+
+
+        function closeDrawingDetail() {
+            drawingDetailOverlay.classList.remove("open");
+            drawingDetailOverlay.setAttribute(
+                "aria-hidden",
+                "true"
+            );
+
+            document.body.style.position = "";
+            document.body.style.top = "";
+            document.body.style.width = "";
+
+            window.scrollTo(0, drawingDetailScrollY);
+        }    
+
+
         /*
         드로잉 이미지 70장
         파일 이름과 확장자는 실제 파일과 정확히 같아야 함
@@ -648,6 +938,27 @@
     }
 
 
+    /*
+    드로잉 제목, 설명
+    */
+    const drawingDescriptions = {
+        "H01_바람.jpeg": {
+            title: "바람",
+            description: "여기에 바람 드로잉에 대한 설명을 입력합니다."
+        },
+
+        "H02_물가.jpeg": {
+            title: "물가",
+            description: "여기에 물가 드로잉에 대한 설명을 입력합니다."
+        },
+
+        "V01_파도.jpeg": {
+            title: "파도",
+            description: "여기에 파도 드로잉에 대한 설명을 입력합니다."
+        }
+    };
+
+
     function shuffleArray(array, random) {
         const copiedArray = [...array];
 
@@ -686,6 +997,13 @@
                 .replaceAll("_", " ");
 
             image.draggable = false;
+
+            image.addEventListener("click", () => {
+                openDrawingDetail(
+                    fileName,
+                    image.naturalWidth / image.naturalHeight
+                );
+            });
 
             image.addEventListener(
                 "load",
@@ -1450,6 +1768,24 @@
 
 
     initializeDrawings();
+
+
+    /*
+    드로잉 상세보기 닫기 버튼
+    */
+    drawingDetailClose.addEventListener(
+        "click",
+        closeDrawingDetail
+    );
+
+    document.addEventListener("keydown", (event) => {
+        if (
+            event.key === "Escape" &&
+            drawingDetailOverlay.classList.contains("open")
+        ) {
+            closeDrawingDetail();
+        }
+    });
 
 
     /*
