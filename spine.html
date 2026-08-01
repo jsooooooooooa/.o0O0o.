@@ -1416,34 +1416,15 @@
         /*
         화면에 들어오는 그림만 등장
         */
-        const drawingObserver =
-            new IntersectionObserver(
-                (entries, observer) => {
-                    entries.forEach((entry) => {
-                        if (!entry.isIntersecting) {
-                            return;
-                        }
+        requestAnimationFrame(() => {
+            drawingsSection
+                .querySelectorAll(".drawing")
+                .forEach((drawing) => {
+                    drawing.classList.add("visible");
+                });
+        });
 
-                        entry.target.classList.add(
-                            "visible"
-                        );
-
-                        observer.unobserve(
-                            entry.target
-                        );
-                    });
-                },
-                {
-                    threshold: 0.08,
-                    rootMargin: "90px 0px"
-                }
-            );
-
-        drawingsSection
-            .querySelectorAll(".drawing")
-            .forEach((drawing) => {
-                drawingObserver.observe(drawing);
-            });
+        return;
     }
 
 
