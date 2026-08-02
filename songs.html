@@ -109,62 +109,63 @@
             transform-origin:left center;
         }
 
-        #add-button{
+        #add-button {
+            position: relative;
             display: block;
 
-            width:50px;
-            height:50px;
+            width: 56px;
+            height: 56px;
 
-            margin:1px 0 0 auto;
+            margin: 1px 0 0 auto;
 
-            border:none;
-            background:var(--bg);
+            border: none;
+            background: transparent;
 
-            cursor:pointer;
-            -webkit-tap-highlight-color:transparent;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
 
-            clip-path:polygon(
-                42% 0%,
-                58% 0%,
-                58% 42%,
-                100% 42%,
-                100% 58%,
-                58% 58%,
-                58% 100%,
-                42% 100%,
-                42% 58%,
-                0% 58%,
-                0% 42%,
-                42% 42%
-            );
+            transition: transform .15s ease;
+        }
 
-            box-shadow:0 0 0 1.4px var(--line) inset;
+
+        #add-button svg {
+            display: block;
+
+            width: 100%;
+            height: 100%;
+
+            overflow: visible;
+        }
+
+        #add-button path {
+            fill: var(--bg);
+            stroke: var(--line);
+            stroke-width: 2.5;
+
+            stroke-linejoin: miter;
+            vector-effect: non-scaling-stroke;
 
             transition:
-                background-color .18s ease,
-                transform .15s ease;
+                fill 0.18s ease,
+                stroke 0.18s ease;
         }
 
-        #add-button:active{
-            background:var(--line);
-
-            transform:scale(.95);
+        #add-button:active {
+            transform: scale(0.95);
         }
 
-        #add-button:hover {
-            background: var(--line);
-            color: var(--bg);
-            transform: rotate(90deg);
+        #add-button:active path {
+            fill: var(--line);
         }
 
-        @media (hover:hover){
-
-            #add-button:hover{
-
-                background:var(--line);
-
+        @media (hover: hover) {
+            #add-button:hover {
+                transform: rotate(90deg);
             }
 
+            #add-button:hover path {
+                fill: var(--line);
+            }
         }
 
         #song-list {
@@ -500,7 +501,30 @@
             id="add-button"
             type="button"
             aria-label="노래 검색창 열기"
-        ></button>
+        >
+            <svg
+                viewBox="0 0 100 100"
+                aria-hidden="true"
+            >
+                <path
+                    d="
+                        M42 4
+                        H58
+                        V42
+                        H96
+                        V58
+                        H58
+                        V96
+                        H42
+                        V58
+                        H4
+                        V42
+                        H42
+                        Z
+                    "
+                />
+            </svg>
+        </button>
 
         <section
             id="song-list"
