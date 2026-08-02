@@ -128,7 +128,7 @@
             cursor: pointer;
             -webkit-tap-highlight-color: transparent;
 
-            transition: transform .15s ease;
+            transition: transform .22s ease;
         }
 
 
@@ -154,11 +154,11 @@
                 stroke 0.18s ease;
         }
 
-        #add-button:active {
+        #add-button.tapped {
             transform: rotate(90deg) scale(0.95);
         }
 
-        #add-button:active path {
+        #add-button.tapped path {
             fill: var(--line);
         }
 
@@ -976,7 +976,19 @@
     );
 
 
-    addButton.addEventListener("click", openSearch);
+    addButton.addEventListener("click", () => {
+        addButton.classList.add("tapped");
+
+        setTimeout(() => {
+            openSearch();
+        }, 220);
+
+        setTimeout(() => {
+            addButton.classList.remove("tapped");
+        }, 450);
+    });
+
+
     closeButton.addEventListener("click", closeSearch);
 
 
