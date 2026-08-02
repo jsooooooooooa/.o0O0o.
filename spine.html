@@ -700,7 +700,7 @@
                         "finish",
                         finishReveal,
                         { once: true }
-                    );s
+                    );
 
                 });
             });
@@ -1191,54 +1191,54 @@
     }
 
 
-    function createDrawing(fileName) {
-        const image = new Image();
+    function loadDrawing(fileName) {
+        return new Promise((resolve) => {
+            const image = new Image();
 
-        image.className = "drawing visible";
+            image.className = "drawing";
+            image.src =
+                `images/thumbs/${fileName.replace(".jpeg", ".jpg")}`;
 
-        image.src =
-            `images/thumbs/${fileName.replace(".jpeg", ".jpg")}`;
+            image.alt = fileName
+                .replace(/\.[^.]+$/, "")
+                .replace(/^[HV]\d+_?/, "")
+                .replaceAll("_", " ");
 
-        image.alt = fileName
-            .replace(/\.[^.]+$/, "")
-            .replace(/^[HV]\d+_?/, "")
-            .replaceAll("_", " ");
+            image.draggable = false;
 
-        image.draggable = false;
+            image.addEventListener("click", () => {
+                openDrawingDetail(
+                    fileName,
+                    image.naturalWidth / image.naturalHeight
+                );
+            });
 
-        image.addEventListener("click", () => {
-            openDrawingDetail(
-                fileName,
-                fileName.startsWith("H")
-                    ? 15 / 10.5
-                    : 10.5 / 15
+            image.addEventListener(
+                "load",
+                () => {
+                    resolve({
+                        fileName,
+                        image,
+                        ratio:
+                            image.naturalWidth /
+                            image.naturalHeight
+                    });
+                },
+                { once: true }
+            );
+
+            image.addEventListener(
+                "error",
+                () => {
+                    console.error(
+                        `썸네일을 불러오지 못했습니다: ${fileName}`
+                    );
+
+                    resolve(null);
+                },
+                { once: true }
             );
         });
-
-        image.addEventListener(
-            "error",
-            () => {
-                console.error(
-                    `썸네일을 불러오지 못했습니다: ${fileName}`
-                );
-            },
-            { once: true }
-        );
-
-        return {
-            fileName,
-            image,
-
-            /*
-                H는 가로, V는 세로.
-                모든 종이가 10.5 × 15cm이므로
-                이미지 다운로드 전에 비율을 알 수 있음.
-            */
-            ratio:
-                fileName.startsWith("H")
-                    ? 15 / 10.5
-                    : 10.5 / 15
-        };
     }
 
 
@@ -1632,7 +1632,13 @@
             drawingsSection.style.height =
                 `${currentY + 80}px`;
 
-
+            requestAnimationFrame(() => {
+                drawingsSection
+                    .querySelectorAll(".drawing")
+                    .forEach((drawing) => {
+                        drawing.classList.add("visible");
+                    });
+            });
 
             return;
         }
@@ -1933,14 +1939,26 @@
         drawingsSection.style.height =
             `${furthestBottom + (isMobile ? 100 : 160)}px`;
 
+        requestAnimationFrame(() => {
+            drawingsSection
+                .querySelectorAll(".drawing")
+                .forEach((drawing) => {
+                    drawing.classList.add("visible");
+                });
+        });
 
         return;
     }
 
 
-    function initializeDrawings() {
+    async function initializeDrawings() {
+        const loadedResults =
+            await Promise.all(
+                drawingFiles.map(loadDrawing)
+            );
+
         loadedDrawings =
-            drawingFiles.map(createDrawing);
+            loadedResults.filter(Boolean);
 
         arrangeDrawings();
     }
