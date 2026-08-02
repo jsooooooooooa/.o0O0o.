@@ -502,6 +502,12 @@
             max-width: 62vw;
             max-height: 58dvh;
             margin: 0;
+            opacity: 0;
+            transition: opacity 0.18s ease;
+        }
+
+        #drawing-detail-image.loaded {
+            opacity: 1;
         }
 
         #drawing-detail-text {
@@ -843,8 +849,23 @@
             const description =
                 information.description || "";
 
-            drawingDetailImage.src =
+            drawingDetailImage.classList.remove("loaded");
+            drawingDetailImage.removeAttribute("src");
+
+            const detailImageSource =
                 `images/drawings/${fileName}`;
+
+            drawingDetailImage.onload = () => {
+                drawingDetailImage.classList.add("loaded");
+            };
+
+            drawingDetailImage.onerror = () => {
+                console.error(
+                    `상세 이미지를 불러오지 못했습니다: ${fileName}`
+                );
+            };
+
+            drawingDetailImage.src = detailImageSource;
 
             drawingDetailDescription.textContent = description;
 
