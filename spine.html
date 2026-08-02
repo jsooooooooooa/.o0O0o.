@@ -860,7 +860,7 @@
             drawingDetailImage.onload = () => {
                 drawingDetailImage.classList.add("loaded");
             };
-            
+
             drawingDetailImage.onerror = () => {
                 console.error(
                     `상세 이미지를 불러오지 못했습니다: ${fileName}`
@@ -1297,7 +1297,9 @@
             image.addEventListener("click", () => {
                 openDrawingDetail(
                     fileName,
-                    image.naturalWidth / image.naturalHeight
+                    fileName.startsWith("H")
+                        ? 15 / 10.5
+                        : 10.5 / 15
                 );
             });
 
