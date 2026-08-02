@@ -689,13 +689,6 @@
                     brainImage.style.opacity = "1";
                     
 
-                    requestAnimationFrame(() => {
-                        document
-                            .querySelectorAll(".drawing")
-                            .forEach((drawing) => {
-                                drawing.classList.add("visible");
-                            });
-});
 
                     /* 여기부터 추가 */
                     setTimeout(() => {
@@ -1198,61 +1191,54 @@
     }
 
 
-    function loadDrawing(fileName) {
-        return new Promise((resolve) => {
-            const image = new Image();
+    function createDrawing(fileName) {
+        const image = new Image();
 
-            image.className = "drawing";
-            image.src =
-                `images/thumbs/${fileName.replace(".jpeg", ".jpg")}`;
+        image.className = "drawing visible";
 
-            image.alt = fileName
-                .replace(/\.[^.]+$/, "")
-                .replace(/^[HV]\d+_?/, "")
-                .replaceAll("_", " ");
+        image.src =
+            `images/thumbs/${fileName.replace(".jpeg", ".jpg")}`;
 
-            image.draggable = false;
+        image.alt = fileName
+            .replace(/\.[^.]+$/, "")
+            .replace(/^[HV]\d+_?/, "")
+            .replaceAll("_", " ");
 
-            image.addEventListener("click", () => {
-                openDrawingDetail(
-                    fileName,
-                    image.naturalWidth / image.naturalHeight
-                );
-            });
+        image.draggable = false;
 
-            image.addEventListener(
-                "load",
-                () => {
-                    resolve({
-                        fileName,
-                        image,
-
-                        /*
-                            실제 이미지 크기로 비율 계산
-                        */
-                        ratio:
-                            image.naturalWidth /
-                            image.naturalHeight
-                    });
-                },
-                { once: true }
-            );
-
-            image.addEventListener(
-                "error",
-                () => {
-                    console.error(
-                        `이미지를 불러오지 못했습니다: ${fileName}`
-                    );
-
-                    /*
-                        파일 하나가 깨져도 나머지는 계속 배치
-                    */
-                    resolve(null);
-                },
-                { once: true }
+        image.addEventListener("click", () => {
+            openDrawingDetail(
+                fileName,
+                fileName.startsWith("H")
+                    ? 15 / 10.5
+                    : 10.5 / 15
             );
         });
+
+        image.addEventListener(
+            "error",
+            () => {
+                console.error(
+                    `썸네일을 불러오지 못했습니다: ${fileName}`
+                );
+            },
+            { once: true }
+        );
+
+        return {
+            fileName,
+            image,
+
+            /*
+                H는 가로, V는 세로.
+                모든 종이가 10.5 × 15cm이므로
+                이미지 다운로드 전에 비율을 알 수 있음.
+            */
+            ratio:
+                fileName.startsWith("H")
+                    ? 15 / 10.5
+                    : 10.5 / 15
+        };
     }
 
 
@@ -1952,14 +1938,9 @@
     }
 
 
-    async function initializeDrawings() {
-        const loadedResults =
-            await Promise.all(
-                drawingFiles.map(loadDrawing)
-            );
-
+    function initializeDrawings() {
         loadedDrawings =
-            loadedResults.filter(Boolean);
+            drawingFiles.map(createDrawing);
 
         arrangeDrawings();
     }
