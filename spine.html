@@ -700,7 +700,7 @@
                         "finish",
                         finishReveal,
                         { once: true }
-                    );
+                    );s
 
                 });
             });
@@ -2143,7 +2143,25 @@
     화면 방향이나 크기가 실제로 크게 바뀐 경우에만
     드로잉을 다시 배치
     */
+    let previousViewportWidth = window.innerWidth;
+
     window.addEventListener("resize", () => {
+        const currentViewportWidth = window.innerWidth;
+
+        /*
+            주소창이 접히면서 높이만 바뀐 경우에는
+            드로잉을 다시 배치하지 않음
+        */
+        if (
+            Math.abs(
+                currentViewportWidth - previousViewportWidth
+            ) < 20
+        ) {
+            return;
+        }
+
+        previousViewportWidth = currentViewportWidth;
+
         clearTimeout(resizeTimer);
 
         resizeTimer = setTimeout(() => {
