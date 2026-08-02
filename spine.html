@@ -331,6 +331,21 @@
         -webkit-tap-highlight-color: transparent;
     }
 
+    #spine-left-text,
+    #spine-right-text {
+        position: absolute;
+
+        color: var(--text);
+
+        font-size: 11px;
+        letter-spacing: 0.08em;
+
+        opacity: 0.75;
+
+        user-select: none;
+        pointer-events: none;
+    }
+
     #drawing-detail-overlay {
         position: fixed;
         inset: 0;
@@ -549,6 +564,14 @@
             draggable="false"
         >
 
+        <div id="spine-left-text">
+            ( ( ( 0 ) ) )
+        </div>
+
+        <div id="spine-right-text">
+            @jseratiitarai
+        </div>
+
         <div
             class="bottom-space"
             aria-hidden="true"
@@ -617,6 +640,45 @@
             });
         }
 
+        function positionSpineTexts() {
+
+            const spineRect =
+                spineImage.getBoundingClientRect();
+
+            const pageY =
+                window.scrollY + spineRect.top;
+
+            const centerY =
+                pageY + spineRect.height / 2;
+
+            const centerX =
+                spineRect.left + spineRect.width / 2;
+
+            const leftText =
+                document.getElementById("spine-left-text");
+
+            const rightText =
+                document.getElementById("spine-right-text");
+
+            leftText.style.top =
+                `${centerY}px`;
+
+            rightText.style.top =
+                `${centerY}px`;
+
+            leftText.style.left =
+                `${centerX - spineRect.width * 0.34}px`;
+
+            rightText.style.left =
+                `${centerX + spineRect.width * 0.34}px`;
+
+            leftText.style.transform =
+                "translate(-100%, -50%)";
+
+            rightText.style.transform =
+                "translate(0, -50%)";
+        }
+
        /*
         등장 애니메이션이 끝난 뒤
         남아 있는 위아래 마스크를 제거
@@ -637,6 +699,8 @@
         */
         function revealSpineImage() {
             centerSpineImage();
+
+            positionSpineTexts();
 
             requestAnimationFrame(() => {
                 requestAnimationFrame(() => {
@@ -2165,6 +2229,8 @@
 
     window.addEventListener("resize", () => {
         const currentViewportWidth = window.innerWidth;
+
+        positionSpineTexts();
 
         /*
             주소창이 접히면서 높이만 바뀐 경우에는
